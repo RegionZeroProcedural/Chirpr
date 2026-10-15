@@ -1,0 +1,33 @@
+/* Text-only posting retains its composer-to-feed flight; media still uses
+   the separate paper-airplane upload flow. Preserve scroll shards and FLIP. */
+.feed-card--awaiting-entry { visibility: hidden; }
+.feed-card--landed { animation: chirpr-text-chirp-land .85s cubic-bezier(.13,.85,.35,1) both; }
+@keyframes chirpr-text-chirp-land {
+  0% { filter: brightness(1.6) drop-shadow(0 0 24px var(--chirp-accent, #a875ff)); }
+  100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+}
+/* The flight is a portal at the top document layer, so it is never clipped
+   by the feed's fragment or smooth-reflow transforms. */
+.account-chirp-flight { isolation: isolate; }
+@media (prefers-reduced-motion: reduce) {
+  .feed-card--landed { animation: none !important; }
+}
+
+/* Performance pass: the flying card is a single static visual copy. Animate
+   only opacity/transform; animating blur across a full glass panel is costly. */
+.account-chirp-flight { filter: none !important; }
+.account-chirp-flight[data-phase='flying'] {
+  animation-name: chirpr-text-flight-gpu;
+  will-change: transform, opacity;
+}
+@keyframes chirpr-text-flight-gpu {
+  0% { opacity: 0; transform: translate3d(0, -14px, 0) scale(1.01); }
+  23% { opacity: 1; }
+  83% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(var(--fly-x), var(--fly-y), 0) scale(var(--fly-scale)); }
+}
+@media (max-width:700px), (pointer:coarse) {
+  .account-chirp-flight__sparkles i:nth-child(n+8) { display:none; }
+  .account-chirp-flight .feed-chirp { box-shadow: 0 8px 24px hsl(var(--profile-hue) 68% 65% / .16); }
+  .feed-card[data-has-media="yes"][data-ready="yes"] .feed-card__base { filter: none !important; }
+}

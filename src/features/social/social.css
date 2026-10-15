@@ -1,0 +1,143 @@
+/* CHIRPR / SOCIAL SYSTEM: scoped surfaces; no full-page backdrop blur during scrolling */
+.social-page { min-height:100vh; position:relative; isolation:isolate; color:#eef2ff; background:radial-gradient(ellipse at 16% -16%,rgba(100,69,218,.16),transparent 45%),radial-gradient(ellipse at 110% 14%,rgba(37,175,204,.09),transparent 34%),#0d101c; font-family:Inter,system-ui,sans-serif; overflow-x:clip }
+.social-page__ambient { position:fixed; pointer-events:none; width:45vw; height:45vw; right:-25vw; bottom:-26vw; background:radial-gradient(circle,rgba(143,78,223,.15),transparent 62%); z-index:-1 }
+.social-page__top { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px max(24px,calc((100vw - 1320px)/2)); border-bottom:1px solid rgba(183,192,255,.1); background:rgba(17,21,36,.83); position:relative; z-index:1 }
+.social-page__top>a:last-child { text-decoration:none; color:#b8c5e9; font-size:13px }
+.social-page__grid { max-width:1340px; padding:40px 24px 120px; display:grid; grid-template-columns:minmax(180px,230px) minmax(0,850px); gap:42px; margin:auto }
+.social-page__rail { position:relative }
+.chirpr-universal-nav { display:grid; gap:6px; position:sticky; top:24px }
+.chirpr-universal-nav a { display:flex; align-items:center; gap:14px; padding:13px 17px; color:#b1bdd7; border-radius:16px; border:1px solid transparent; font-size:14px; text-decoration:none; transition:color .2s,border-color .2s,background .2s,transform .2s }
+.chirpr-universal-nav a span { width:18px; text-align:center; color:#9c91f3; font-size:19px }
+.chirpr-universal-nav a:hover,.chirpr-universal-nav a:focus-visible { color:#fff; background:rgba(137,115,222,.12); border-color:rgba(174,151,253,.26); transform:translateX(3px) }
+.chirpr-universal-nav--compact { padding-top:12px; border-top:1px solid rgba(189,188,242,.1); margin-top:12px }
+.chirpr-universal-nav--compact a { padding:7px 11px; font-size:12px; gap:10px }
+.chirpr-universal-nav--compact a span { font-size:16px }
+.social-page__main { min-width:0 }
+.social-page__hero { padding:24px 0 34px; border-bottom:1px solid rgba(213,211,255,.12); margin-bottom:23px }
+.social-page__hero>span { font-size:10px; letter-spacing:.23em; color:#b1a9f8; font-weight:800 }
+.social-page__hero h1 { font-size:clamp(34px,5vw,64px); font-weight:750; letter-spacing:-.055em; line-height:1.07; margin:15px 0 16px; color:#fcfaff }
+.social-page__hero h1 em { font-style:normal; background:linear-gradient(120deg,#96abff,#d8a1ff,#85f3f8); -webkit-background-clip:text; background-clip:text; color:transparent }
+.social-page__hero p { font-size:15px; color:#aab5d2; line-height:1.75; max-width:590px; margin:0 }
+.social-panel { background:linear-gradient(135deg,rgba(46,50,79,.46),rgba(19,23,42,.7)); border:1px solid rgba(172,173,233,.18); border-radius:24px; padding:25px; margin:0 0 22px; box-shadow:0 12px 36px rgba(5,8,26,.19),inset 0 1px rgba(255,255,255,.045); min-width:0 }
+.social-panel h2 { font-weight:700; font-size:20px; letter-spacing:-.025em; margin:0 0 17px }
+.social-panel h2 small { font-size:12px; color:#949db9; float:right; font-weight:500 }
+.social-search { border-radius:19px; background:rgba(38,45,71,.6); border:1px solid rgba(152,169,240,.3); display:flex; align-items:center; gap:14px; padding:12px 18px; margin:0 0 18px; transition:border-color .2s,box-shadow .2s }
+.social-search:focus-within { border-color:#a6b0f8; box-shadow:0 0 0 3px rgba(145,120,255,.11) }
+.social-search span { font-size:24px; color:#b6aaf6 }
+.social-search input { width:100%; padding:5px 0; border:0; background:transparent; color:white; outline:0; font:inherit }
+.social-search input::placeholder { color:#77839e }
+.social-filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px }
+.social-filters button { border:1px solid rgba(192,193,240,.18); border-radius:50px; background:rgba(255,255,255,.035); color:#a8b5d4; padding:10px 19px; text-transform:capitalize; cursor:pointer; transition:background .18s,color .18s }
+.social-filters button.is-active,.social-filters button:hover { background:rgba(127,109,241,.2); color:#fff; border-color:rgba(155,147,246,.5) }
+.social-user-row { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px 0; border-top:1px solid rgba(188,185,241,.1) }
+.social-user-row__profile { display:flex; align-items:center; gap:14px; color:#f5f4ff; text-decoration:none; min-width:0 }
+.social-user-row__profile>span:last-child { display:grid; gap:4px; min-width:0 }
+.social-user-row__profile small { font-size:12px; color:#8b98b5 }
+.social-user-row__avatar { width:44px; height:44px; border-radius:16px; background:linear-gradient(145deg,rgba(95,84,182,.65),rgba(24,182,204,.24)); display:grid; place-items:center; flex-shrink:0; overflow:hidden }
+.social-user-row__avatar img { width:100%; height:100%; object-fit:cover }
+.social-pill { border-radius:40px; background:rgba(122,104,223,.15); border:1px solid rgba(172,163,250,.32); color:#f1eaff; cursor:pointer; padding:9px 15px; white-space:nowrap }
+.social-pill:hover { background:rgba(122,104,223,.3) }
+.social-tags { display:flex; flex-wrap:wrap; gap:10px }
+.social-tags a { display:grid; gap:7px; padding:13px 19px; border-radius:15px; color:#d6e4ff; text-decoration:none; background:rgba(93,111,185,.13); border:1px solid rgba(161,180,237,.2); transition:transform .2s,background .2s }
+.social-tags a:hover { transform:translateY(-3px); background:rgba(114,101,208,.22) }
+.social-tags span { color:#8793ad; font-size:11px }
+.social-post-results { display:grid; gap:18px; min-width:0 }
+.social-post-results>.feed-card { max-width:100%; }
+.social-empty { text-align:center; border:1px dashed rgba(176,182,234,.16); padding:45px 18px; color:#a1acca; border-radius:18px; line-height:1.6 }
+.social-empty>span { color:#b0a6fe; display:block; font-size:34px; margin-bottom:9px }
+.social-empty a { color:#a4c5ff }
+.social-activity { display:flex; align-items:center; color:#dce2f3; text-decoration:none; padding:18px 5px; border-top:1px solid rgba(180,174,231,.12); gap:14px }
+.social-activity__icon { background:rgba(132,94,222,.14); color:#d3b8ff; min-width:44px; height:44px; display:grid; place-items:center; border-radius:14px; font-size:20px }
+.social-activity span:nth-child(2) { flex:1; line-height:1.55; font-size:14px }
+.social-activity small { display:block; font-size:11px; color:#8996ac; margin-top:3px }
+.social-activity>b { color:#98b9ff; font-size:16px }
+.social-activity:hover { background:rgba(123,107,195,.08) }
+.social-message-layout { display:grid; grid-template-columns:minmax(150px,230px) minmax(0,1fr); gap:16px }
+.social-message-contacts { padding:16px }
+.social-message-contacts h2 { font-size:16px; padding:4px 7px }
+.social-message-contacts button { width:100%; text-align:left; background:transparent; border:1px solid transparent; border-radius:12px; padding:13px; display:grid; gap:5px; color:#eef0ff; cursor:pointer }
+.social-message-contacts button small { color:#8995ad }
+.social-message-contacts button.is-active,.social-message-contacts button:hover { background:rgba(115,93,209,.18); border-color:rgba(159,139,252,.21) }
+.social-message-thread { display:flex; flex-direction:column; padding:17px; min-height:480px }
+.social-message-thread header { padding:8px 4px 18px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(198,196,250,.12) }
+.social-message-thread header a { font-size:12px; color:#b1b9ff }
+.social-message-scroll { flex:1; min-height:200px; max-height:480px; overflow-y:auto; padding:22px 6px; display:flex; flex-direction:column; gap:13px; scrollbar-width:none }
+.social-bubble { align-self:flex-start; border-radius:17px 17px 17px 3px; background:rgba(87,104,157,.22); color:#e9efff; padding:12px 16px; max-width:82%; word-break:break-word; line-height:1.5; border:1px solid rgba(175,188,235,.12) }
+.social-bubble--mine { align-self:flex-end; border-radius:17px 17px 3px 17px; background:linear-gradient(135deg,rgba(104,89,203,.39),rgba(71,129,197,.25)); border-color:rgba(188,172,243,.2) }
+.social-bubble small { display:block; text-align:right; margin-top:5px; color:#aab7d0; font-size:10px }
+.social-message-compose { display:flex; gap:8px; padding:9px 0 0; border-top:1px solid rgba(202,204,243,.12) }
+.social-message-compose input,.social-account-switch select { width:100%; border:1px solid rgba(163,160,222,.26); border-radius:12px; padding:12px; background:#1b2035; color:#fff; min-width:0 }
+.social-message-compose button,.social-reply-form button,.social-account-switch button { border:1px solid rgba(210,194,255,.24); border-radius:13px; padding:11px 19px; color:#fff; background:rgba(91,77,179,.45); cursor:pointer; flex-shrink:0 }
+.social-setting { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:18px 0; border-top:1px solid rgba(200,193,237,.1); cursor:pointer }
+.social-setting span { display:grid; gap:6px }.social-setting small,.social-hint { display:block; font-size:13px; color:#a1acc4; line-height:1.65 }
+.social-setting input { appearance:none; width:50px; height:28px; border-radius:50px; background:#293249; border:1px solid rgba(190,201,242,.23); flex-shrink:0; position:relative; cursor:pointer; transition:background .2s }
+.social-setting input:after { content:''; position:absolute; top:3px; left:3px; height:20px; width:20px; background:#b6bed5; border-radius:50%; transition:transform .22s }
+.social-setting input:checked { background:linear-gradient(90deg,#7f52d8,#4f9acb) }
+.social-setting input:checked:after { transform:translateX(21px); background:#fff }
+.social-settings-links { display:grid; gap:6px }
+.social-settings-links a { text-decoration:none; display:flex; justify-content:space-between; padding:16px; color:#dfdfff; border-radius:13px; border:1px solid transparent }
+.social-settings-links a:hover { background:rgba(106,93,205,.14); border-color:rgba(164,149,248,.21) }
+.social-account-switch { display:flex; gap:10px; flex-wrap:wrap }.social-account-switch select { flex:1 }
+.social-danger { border:1px solid rgba(255,124,149,.4); background:rgba(255,90,115,.09); border-radius:14px; color:#ffb7ca; padding:13px 18px; cursor:pointer }
+.social-safety-tags { display:flex; gap:30px; flex-wrap:wrap }.social-safety-tags h3 { font-size:14px }.social-safety-tags button { margin:2px; border-radius:12px; border:1px solid rgba(168,163,248,.2); background:rgba(120,101,218,.12); color:#eef; padding:7px 12px; cursor:pointer }
+.social-link { color:#bcc7ff }.social-reply { border-top:1px solid rgba(192,185,240,.14); padding:18px 0 }
+.social-reply>a { color:#f6efff; text-decoration:none }.social-reply small { color:#929eb6; font-size:12px }.social-reply p { margin:10px 0; line-height:1.65 }
+.social-reply-form textarea,.social-dialog textarea { width:100%; min-height:100px; padding:15px; box-sizing:border-box; resize:vertical; border-radius:16px; border:1px solid rgba(154,163,230,.27); background:rgba(18,23,40,.7); font:inherit; color:#fff; outline:0 }
+.social-reply-form button { margin-top:12px }
+.social-chirp-actions { flex-wrap:wrap }
+.social-chirp-actions button { min-height:36px }
+.social-dialog-scrim { position:fixed; inset:0; z-index:100000; background:rgba(5,8,18,.78); display:grid; place-items:center; padding:18px; animation:socialFade .2s both }
+.social-dialog { width:min(500px,100%); max-height:min(86vh,800px); overflow:auto; box-sizing:border-box; padding:28px; border-radius:28px; background:linear-gradient(150deg,rgba(44,49,78,.96),rgba(21,26,45,.97)); border:1px solid rgba(202,191,255,.3); box-shadow:0 25px 110px rgba(5,3,24,.7),0 0 40px rgba(110,82,230,.13); animation:socialPanel .32s cubic-bezier(.2,.9,.2,1) both }
+.social-dialog__head { display:flex; align-items:center; justify-content:space-between; color:#9ca6d3; letter-spacing:.15em; font-weight:700; font-size:10px }
+.social-dialog__head button { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); color:#fff; border-radius:50%; height:32px; width:32px; cursor:pointer }
+.social-dialog h2 { font-size:30px; line-height:1.2; letter-spacing:-.05em; margin:22px 0 14px; color:#fff }
+.social-dialog blockquote { border-left:2px solid #9588f3; margin:18px 0; padding:12px 16px; background:rgba(108,107,180,.1); color:#bfc9e3; font-size:14px; border-radius:0 10px 10px 0; line-height:1.6 }
+.social-dialog form { display:grid; gap:13px }
+.social-dialog form>button,.social-dialog__actions button,.social-dialog__actions a { text-align:center; color:#fff; background:rgba(116,86,220,.25); border:1px solid rgba(162,151,243,.32); border-radius:14px; padding:12px 17px; cursor:pointer; text-decoration:none }
+.social-dialog__actions { display:flex; gap:10px; flex-wrap:wrap }
+.social-dialog p { color:#acb8d4; line-height:1.6 }
+.social-dock { display:none }
+@keyframes socialFade { from { opacity:0 } to { opacity:1 } }
+@keyframes socialPanel { from { opacity:0; transform:translateY(18px) scale(.97) } to { opacity:1; transform:translateY(0) scale(1) } }
+@media (max-width:900px) { .social-page__grid { gap:18px; grid-template-columns:180px minmax(0,1fr); padding:22px 16px 100px }.social-page__rail { display:none }.social-page__grid { display:block; max-width:780px } }
+@media (max-width:700px) { .social-page__top { padding:17px 20px }.social-page__grid { padding:10px 12px 100px }.social-page__hero { padding-top:20px }.social-page__hero h1 { font-size:39px }.social-panel { padding:18px; border-radius:20px }.social-message-layout { display:block }.social-message-contacts { display:flex; gap:6px; overflow-x:auto; padding:8px; margin-bottom:12px; scrollbar-width:none }.social-message-contacts h2 { display:none }.social-message-contacts button { min-width:110px }.social-message-thread { min-height:420px }.social-dock { position:fixed; bottom:0; left:0; right:0; z-index:999; display:flex; justify-content:space-around; align-items:center; min-height:58px; padding:4px 8px calc(5px + env(safe-area-inset-bottom)); background:rgba(15,18,30,.95); border-top:1px solid rgba(171,169,226,.24); box-shadow:0 -15px 40px rgba(7,9,28,.3) }.social-dock a { color:#b6c1d7; font-size:9px; text-decoration:none; display:grid; text-align:center; gap:3px; padding:5px; min-width:42px }.social-dock a span { color:#bdb1ff; font-size:20px }.social-dock a.is-active { color:white } }
+@media (prefers-reduced-motion:reduce) { .social-page *, .social-dialog, .social-dialog-scrim { animation-duration:.01ms!important; transition-duration:.01ms!important } }
+.chirp-options__edit select { background:#191e32; color:#f1f2ff; padding:12px; border:1px solid rgba(170,157,241,.4); border-radius:12px; margin-bottom:8px }
+.chirp-options__edit small { line-height:1.5; color:#9ba7c5 }
+.feed-chirp__actions .social-thread-link { display:inline-flex; gap:5px; align-items:center; color:inherit; font:inherit; text-decoration:none; padding:7px 9px; border-radius:9px }.feed-chirp__actions .social-thread-link:hover { color:#ded0ff; background:rgba(145,112,215,.12) }
+.groups-privacy { display:flex!important; align-items:center; gap:10px; color:#c5c9e5; font-size:13px; text-align:left }
+.groups-privacy input { width:17px!important; height:17px; flex:none }
+.groups-section-tabs { display:flex; gap:8px; margin:20px 0; border-bottom:1px solid rgba(168,158,230,.23); padding:0 6px 13px }
+.groups-section-tabs button { text-transform:capitalize; border:1px solid rgba(163,153,237,.22); padding:10px 20px; border-radius:13px; background:rgba(107,98,180,.1); color:#b8b9d2; cursor:pointer }
+.groups-section-tabs button.is-active { color:#fff; background:rgba(117,89,209,.24); border-color:rgba(193,172,255,.47) }
+.groups-admin,.groups-rules { padding:20px; margin:20px 0; border:1px solid rgba(182,171,252,.22); background:rgba(25,27,48,.74); border-radius:19px; color:#d8d8eb }
+.groups-admin h3 { font-size:16px; color:#d4bdff }.groups-admin p { color:#9aa7be; font-size:12px; line-height:1.6 }
+.groups-admin label { display:grid; gap:9px; margin:12px 0; font-size:13px }.groups-admin textarea { resize:vertical; min-height:70px; background:#171b31; color:#fff; border:1px solid rgba(173,156,238,.24); padding:12px; border-radius:12px }
+.groups-admin button,.groups-moderator-actions button,.groups-request button { cursor:pointer; color:#d9d8ff; background:rgba(96,90,190,.21); border:1px solid rgba(164,149,229,.23); border-radius:12px; padding:9px 13px }
+.groups-request { display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:12px; border-top:1px solid rgba(170,162,215,.15) }.groups-moderator-actions { display:flex; gap:8px; justify-content:flex-end; margin:-1px 6px 23px; position:relative; z-index:2 }
+.groups-moderator-actions button { font-size:12px }.groups-pinned-label { font-size:12px; color:#d8b3f7; padding:0 14px 8px }
+.groups-rules { white-space:pre-wrap; line-height:1.7 }.groups-rules a { color:#aac7ff }.groups-members>div>div { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap }
+.groups-members button { border:1px solid rgba(211,126,158,.27); color:#fac4cf; background:rgba(132,45,75,.18); padding:8px 12px; border-radius:10px; cursor:pointer }
+.chirpr-reel__social { display:flex; padding:10px 8px; border-radius:12px; margin:8px 0 20px; background:rgba(28,32,52,.65); border:1px solid rgba(155,145,235,.15) }
+.chirpr-reel__social .feed-chirp__actions { padding:0!important; width:100%; margin:0; flex-wrap:wrap; justify-content:space-around; gap:3px }
+.chirpr-reel__social .feed-chirp__actions button,.chirpr-reel__social .feed-chirp__actions a { color:#d5dbf0; font-size:12px; background:rgba(121,111,189,.08); border-radius:8px }
+/* Explicit user motion preference. No layout-shifting fragment styles remain. */
+body.chirpr-reduce-motion .feed-card__shards,body.chirpr-reduce-motion .account-chirp-flight__sparkles { display:none!important }
+body.chirpr-reduce-motion .feed-card__base { opacity:1!important; transform:none!important; filter:none!important }
+body.chirpr-reduce-motion *,body.chirpr-reduce-motion *::before,body.chirpr-reduce-motion *::after { animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; scroll-behavior:auto!important }
+
+
+/* Reply scale is subordinate to the parent chirp. */
+.social-reply { padding:11px 0 10px; }
+.social-reply>a { font-size:12px; }
+.social-reply>a strong { font-weight:650; }
+.social-reply small { font-size:10px; }
+.social-reply p { font-size:12px; line-height:1.48; margin:5px 0; overflow-wrap:anywhere; }
+.social-reply-form textarea { min-height:66px; height:78px; max-height:150px; padding:11px 13px; font-size:13px; }
+.social-reply-form button { margin-top:8px; font-size:12px; padding:9px 15px; }
+.social-dialog--reply { width:min(420px,100%); padding:21px; border-radius:21px; }
+.social-dialog--reply h2 { font-size:23px; margin:14px 0 10px; }
+.social-dialog--reply blockquote { font-size:12px; padding:8px 12px; margin:10px 0; max-height:100px; overflow:auto; }
+.social-dialog--reply textarea { min-height:74px; max-height:140px; padding:10px 12px; font-size:13px; }
+.social-dialog--reply form>button { padding:10px 15px; }
+@media (max-width:700px) { .social-dialog--reply { width:min(390px,100%); padding:17px; } .social-reply {padding:9px 0;} }

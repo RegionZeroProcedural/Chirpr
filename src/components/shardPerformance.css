@@ -1,0 +1,105 @@
+/* Chirpr / fast compositor path — real post remains a single interactive DOM
+   tree. Animated shards are only cheap, noninteractive painted silhouettes.
+   Imported after shardConsistency.css so the media post fix stays effective. */
+.feed-card__shard {
+  filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  contain: paint;
+}
+.feed-card__shard-paint {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border: 1px solid hsl(var(--chirp-hue) 74% 84% / .26);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse 60% 65% at 91% 0%, hsl(var(--chirp-hue) 86% 65% / .25), transparent 100%),
+    linear-gradient(130deg, hsl(var(--chirp-hue) 40% 28% / .94), rgba(18,27,52,.97) 72%);
+}
+/* Avatar + simple header line fragments: no text layout, images, blur or React
+   components to rasterize eight times while scrolling. */
+.feed-card__shard-paint::before {
+  content: '';
+  position: absolute;
+  top: 22px;
+  left: 24px;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, hsl(var(--chirp-hue) 78% 73% / .75), hsl(var(--chirp-hue) 63% 42% / .7));
+  box-shadow: 55px -4px 0 -18px rgba(222,232,255,.6),
+              57px 13px 0 -19px rgba(161,181,232,.65);
+}
+.feed-card__shard-paint::after {
+  content: '';
+  position: absolute;
+  top: 93px;
+  left: 24px;
+  width: calc(100% - 48px);
+  height: calc(100% - 112px);
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, hsl(var(--chirp-hue) 76% 81% / .55), transparent 78%) left 0 / 38% 5px no-repeat,
+    linear-gradient(90deg, rgba(211,222,250,.51), transparent) left 27px / 95% 4px no-repeat,
+    linear-gradient(90deg, rgba(195,210,247,.43), transparent) left 43px / 82% 4px no-repeat,
+    linear-gradient(90deg, rgba(184,207,244,.34), transparent) left 59px / 68% 4px no-repeat,
+    linear-gradient(90deg, rgba(151,171,225,.36), transparent 73%) left bottom / 100% 3px no-repeat;
+}
+/* Tall media posts are represented by one abstract pane in the moving shards.
+   Real photos/videos remain exactly once, in the base, with moderation intact. */
+.feed-card[data-has-media='yes'] .feed-card__shard-paint::after {
+  background:
+    linear-gradient(90deg, rgba(215,226,253,.43),transparent) left 0 / 75% 4px no-repeat,
+    linear-gradient(90deg, rgba(180,200,240,.31),transparent) left 18px / 57% 4px no-repeat,
+    radial-gradient(ellipse at 58% 43%, hsl(var(--chirp-hue) 80% 67% / .28), transparent 73%) center 42px / 100% calc(100% - 60px) no-repeat,
+    linear-gradient(135deg,hsl(var(--chirp-hue) 65% 46% / .25),rgba(23,36,78,.9)) center 42px / 100% calc(100% - 60px) no-repeat;
+}
+.feed-card[data-ready='yes'] .feed-card__shards { display: block; }
+/* Solid posts require no animated paint layer. Showing it only during the
+   transition reduces overdraw and GPU surface allocation when idle. */
+.feed-card[data-animating='no'] .feed-card__shards { visibility: hidden; }
+.feed-card[data-animating='yes'] .feed-card__shard { will-change: transform; }
+.feed-card[data-animating='no'] .feed-card__shard { will-change: auto; }
+
+@media (max-width: 700px), (pointer: coarse) {
+  /* Blurring moving glass surfaces is a major mobile GPU bottleneck. Keep the
+     same colorful glass appearance via existing gradient and thin border. */
+  .feed-card .feed-chirp.feed-chirp--themed {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .feed-card__shard-paint::before { top: 18px; left: 17px; width: 38px; height: 38px; }
+  .feed-card__shard-paint::after {
+    top: 83px;
+    left: 17px;
+    width: calc(100% - 34px);
+    height: calc(100% - 103px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .feed-card__shards { display: none !important; }
+  .feed-card__base { opacity: 1 !important; }
+}
+
+/* Large glowing atmosphere layers do not need continuous blur animation on
+   touch devices while the user scrolls through interactive media. */
+@media (max-width: 700px), (pointer: coarse) {
+  .feed-page__aurora i,
+  .account-atmosphere__light { animation: none !important; }
+}
+
+/* Mobile contrast pass must appear AFTER the fast compositor's defaults:
+   readable geometry without enabling additional backdrops/video renders. */
+@media (max-width:700px), (pointer:coarse) {
+  .feed-card__shard-paint {
+    border:1.5px solid hsl(var(--chirp-hue) 90% 83% / .7);
+    background:
+      radial-gradient(ellipse 75% 75% at 80% 14%,hsl(var(--chirp-hue) 95% 69% / .43),transparent 95%),
+      linear-gradient(125deg,hsl(var(--chirp-hue) 58% 39% / .98),rgba(24,35,79,.97) 78%);
+  }
+  .feed-card__shard-paint::before {
+    background:linear-gradient(140deg,hsl(var(--chirp-hue) 90% 82% / .95),hsl(var(--chirp-hue) 75% 56% / .9));
+  }
+}

@@ -1,0 +1,49 @@
+CHIRPR — October 14 repair (frontend only)
+========================================
+
+INSTALL:
+1. BACK UP your current Chirpr/src directory first.
+2. Extract this ZIP into the existing CHIRPR PROJECT ROOT (the folder
+   containing package.json). Allow replacement of the included files.
+   IMPORTANT: You must end up with Chirpr/public/index.html and Chirpr/src/App.js.
+   Do NOT extract into src/ or into public/ individually.
+3. If webpack is already running, stop it with Ctrl+C, then run npm start again.
+4. If a page keeps showing older styles, hard-refresh with Ctrl+Shift+R.
+
+FIXES:
+- Restored the missing public/index.html required by Create React App.
+  It is a minimal valid index.html with the #root element and no references
+  to nonexistent favicon / manifest images.
+- Removed the ESLint disable comment that referenced a missing
+  react-hooks/exhaustive-deps rule. Effect dependencies are explicit.
+- Username availability now gets author signature pink/violet/cyan glow
+  after the 250ms check; taken/invalid usernames get a red glow.
+- Glass buttons' signature glow sits BELOW the button rather than over
+  the face. Border has a brighter glass edge, blurred see-through pane.
+- Replaced the duplicate feed "View profile" navigation with Reels;
+  preserved access to account through "Your profile".
+- Fixed deletion/hiding visual: post fragment burst rendered in a fixed
+  portal above the options modal; applies to Feed and profile pages.
+  The post stays in the DOM until the animation finishes (~1.5 seconds).
+- Optimized mobile scroll fragmentation: four fragments instead of eight,
+  reduced heavy blur/shadow compositing on duplicate card layers, viewport
+  height stabilized during mobile address bar show/hide, and scroll updates
+  are limited to animation frames and changed values. Scroll reversal is
+  preserved and shapes re-randomize only at invisible endpoints.
+
+EXISTING LOCAL DEMO BEHAVIOR:
+- Local mock username check, not global server-side verification.
+- Reels platform video embedding can be restricted by providers.
+- All profile/posts/preferences persist only within the same browser.
+
+FILES TOUCHED (PATCH ZIP):
+  public/index.html
+  src/App.css
+  src/pages/feed.jsx
+  src/pages/editProfileDetails.jsx
+  src/components/useScrollFragments.js
+  src/components/usePostDestruction.js
+  + src/__tests__/featureChecks.test.jsx (unchanged; included in full)
+
+Note: We parsed JSX/JS source and CSS for syntax; no complete CRA browser
+production build or live mobile device test was performed for this patch.

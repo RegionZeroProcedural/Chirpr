@@ -1,0 +1,91 @@
+/* Destination signatures are intentionally compositor-only: no full-screen
+   backdrop blur, scroll locking, copied screens or forced layout. */
+.chirpr-destination { position:fixed; inset:0; z-index:2500; pointer-events:none; overflow:hidden;
+  --travel:#a7a5ff; animation:chirpr-destination-out .72s ease both; }
+.chirpr-destination__glimmer { position:absolute; inset:0; opacity:.7; background:
+  radial-gradient(ellipse 45% 38% at 50% 50%, color-mix(in srgb,var(--travel) 20%,transparent), transparent 78%); }
+.chirpr-destination__identity { position:absolute; left:50%; top:50%; display:grid; justify-items:center; gap:8px;
+  transform:translate(-50%,-50%); color:#f6f7ff; text-shadow:0 4px 20px #060b22; animation:chirpr-destination-emblem .64s cubic-bezier(.2,.8,.2,1) both; }
+.chirpr-destination__identity b {font-size:clamp(38px,7vw,70px);font-weight:400;color:var(--travel);line-height:1;}
+.chirpr-destination__identity small {font-size:9px;font-weight:850;letter-spacing:.22em;white-space:nowrap;}
+.chirpr-destination__shapes {position:absolute;inset:0;}
+.chirpr-destination__shapes i {position:absolute;left:calc(37% + 7% * var(--i));top:calc(35% + 4% * var(--i));
+  display:block;width:var(--size);height:var(--size);
+  border:1.5px solid var(--travel);border-radius:13px;opacity:.7;
+  animation:chirpr-destination-shape .64s cubic-bezier(.16,.82,.2,1) both;animation-delay:calc(var(--i) * 25ms);}
+.chirpr-destination--feed {--travel:#92b6ff;}
+.chirpr-destination--feed .chirpr-destination__shapes i {height:4px;width:180px;border:0;border-radius:8px;background:var(--travel);}
+.chirpr-destination--discover {--travel:#81e9f2;}
+.chirpr-destination--discover .chirpr-destination__shapes i {border-radius:50%;width:var(--ring);height:var(--ring);left:50%;top:50%;margin-left:var(--ring-half);margin-top:var(--ring-half);}
+.chirpr-destination--groups {--travel:#c7a5ff;}
+.chirpr-destination--groups .chirpr-destination__shapes i {border-radius:50%;background:color-mix(in srgb,var(--travel) 25%,transparent);}
+.chirpr-destination--messages {--travel:#88cafa;}
+.chirpr-destination--messages .chirpr-destination__shapes i {border-radius:18px 18px 5px 18px;}
+.chirpr-destination--activity {--travel:#e4b0fc;}
+.chirpr-destination--activity .chirpr-destination__shapes i {border-radius:50%;border-style:dashed;}
+.chirpr-destination--saved {--travel:#ebc6ff;}
+.chirpr-destination--saved .chirpr-destination__shapes i {clip-path:polygon(0 0,100% 0,100% 100%,50% 74%,0 100%);background:color-mix(in srgb,var(--travel) 22%,transparent);}
+.chirpr-destination--thread {--travel:#a8cfff;}
+.chirpr-destination--thread .chirpr-destination__shapes i {border-radius:50% 0 50% 50%;transform:rotate(38deg);}
+.chirpr-destination--tag {--travel:#86def9;}
+.chirpr-destination--tag .chirpr-destination__shapes i {border-radius:4px;transform:rotate(18deg);}
+.chirpr-destination--settings {--travel:#b9a2f8;}
+.chirpr-destination--settings .chirpr-destination__shapes i {transform:rotate(calc(var(--i) * 22deg));}
+.chirpr-destination--safety {--travel:#a7f1d4;}
+.chirpr-destination--safety .chirpr-destination__shapes i {clip-path:polygon(50% 0,100% 20%,90% 72%,50% 100%,10% 72%,0 20%);background:color-mix(in srgb,var(--travel) 22%,transparent);}
+.chirpr-destination--profile {--travel:#b5b0ff;}
+.chirpr-destination--profile .chirpr-destination__shapes i {border-radius:50%;}
+.chirpr-destination--login {--travel:#a7b7ff;}
+.chirpr-destination--login .chirpr-destination__shapes i {border-radius:50%;}
+.chirpr-destination--register {--travel:#e4a4ff;}
+.chirpr-destination--about {--travel:#acc3fd;}
+.chirpr-destination--home {--travel:#adadff;}
+@keyframes chirpr-destination-out {0%{opacity:0}17%{opacity:1}55%{opacity:1}100%{opacity:0}}
+@keyframes chirpr-destination-emblem {0%{opacity:0;transform:translate(-50%,-45%) scale(.82)}35%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-59%) scale(1.05)}}
+@keyframes chirpr-destination-shape {0%{opacity:0;translate:var(--path-x) 75vh;scale:.72;rotate:-25deg}48%{opacity:.65;translate:0 0;scale:1;rotate:0deg}100%{opacity:0;translate:var(--path-exit) -40vh;scale:.78;rotate:17deg}}
+.chirpr-signout {position:fixed;inset:0;z-index:300000;display:grid;place-items:center;overflow:hidden;pointer-events:all;isolation:isolate;background:rgba(7,11,28,.24);}
+.chirpr-signout__side {position:absolute;inset:0;width:50%;background:linear-gradient(115deg,rgba(15,21,45,.95),rgba(35,35,79,.96));animation:chirpr-signout-close .7s cubic-bezier(.42,0,.17,1) both;}
+.chirpr-signout__side--left {left:0;clip-path:polygon(0 0,100% 0,100% 100%,0 100%);--start:-110%;}
+.chirpr-signout__side--right {left:50%;--start:110%;background:linear-gradient(265deg,rgba(15,22,44,.95),rgba(42,25,78,.96));}
+.chirpr-signout__spark {position:relative;color:#b7b1ff;font-size:clamp(45px,8vw,90px);text-shadow:0 0 40px rgba(190,110,247,.68);animation:chirpr-signout-symbol .7s ease both;}
+.chirpr-signout__message {position:absolute;left:0;right:0;top:calc(50% + 75px);display:grid;justify-items:center;gap:9px;text-align:center;animation:chirpr-signout-text .7s ease both;}
+.chirpr-signout__message strong {color:#f4f0ff;font-size:clamp(17px,3vw,27px);letter-spacing:-.035em;}
+.chirpr-signout__message strong span {color:#a09fff;}
+.chirpr-signout__message small {color:#a4b6d8;letter-spacing:.23em;font-size:9px;font-weight:800;}
+@keyframes chirpr-signout-close {from{transform:translate3d(var(--start),0,0)}to{transform:translate3d(0,0,0)}}
+@keyframes chirpr-signout-symbol {0%,27%{opacity:0;transform:scale(.35) rotate(-90deg)}70%{opacity:1;transform:scale(1.1) rotate(10deg)}100%{opacity:1;transform:scale(1)}}
+@keyframes chirpr-signout-text {0%,47%{opacity:0;translate:0 14px}100%{opacity:1;translate:0 0}}
+@media (max-width:700px) { .chirpr-destination__shapes i:nth-child(n+4){display:none;} .chirpr-destination__identity small{font-size:8px;} }
+@media (prefers-reduced-motion:reduce) { .chirpr-destination {display:none!important;} .chirpr-signout *{animation-duration:.01ms!important;} }
+
+/* Each area has its own entrance gesture, not just a different tint. */
+.chirpr-destination--feed .chirpr-destination__shapes i {animation-name:chirpr-enter-stream;}
+.chirpr-destination--discover .chirpr-destination__shapes i {animation-name:chirpr-enter-scan;}
+.chirpr-destination--groups .chirpr-destination__shapes i {animation-name:chirpr-enter-community;}
+.chirpr-destination--messages .chirpr-destination__shapes i {animation-name:chirpr-enter-message;}
+.chirpr-destination--activity .chirpr-destination__shapes i {animation-name:chirpr-enter-activity;}
+.chirpr-destination--saved .chirpr-destination__shapes i {animation-name:chirpr-enter-saved;}
+.chirpr-destination--thread .chirpr-destination__shapes i {animation-name:chirpr-enter-thread;}
+.chirpr-destination--tag .chirpr-destination__shapes i {animation-name:chirpr-enter-tag;}
+.chirpr-destination--settings .chirpr-destination__shapes i {animation-name:chirpr-enter-settings;}
+.chirpr-destination--safety .chirpr-destination__shapes i {animation-name:chirpr-enter-safety;}
+.chirpr-destination--profile .chirpr-destination__shapes i {animation-name:chirpr-enter-profile;}
+.chirpr-destination--login .chirpr-destination__shapes i {animation-name:chirpr-enter-login;}
+.chirpr-destination--register .chirpr-destination__shapes i {animation-name:chirpr-enter-register;}
+.chirpr-destination--about .chirpr-destination__shapes i {animation-name:chirpr-enter-about;}
+.chirpr-destination--home .chirpr-destination__shapes i {animation-name:chirpr-enter-home;}
+@keyframes chirpr-enter-stream {0%{opacity:0;transform:translate3d(-42vw,12vh,0) scaleX(.25)}45%{opacity:.76;transform:translate3d(0,0,0) scaleX(1)}100%{opacity:0;transform:translate3d(40vw,-15vh,0) scaleX(.25)}}
+@keyframes chirpr-enter-scan {0%{opacity:0;transform:scale(.25)}38%{opacity:.6;transform:scale(.95)}100%{opacity:0;transform:scale(1.45)}}
+@keyframes chirpr-enter-community {0%{opacity:0;transform:translate3d(var(--path-x),var(--origin-y),0) scale(.25)}60%{opacity:.8;transform:translate3d(0,0,0) scale(1)}100%{opacity:0;transform:translate3d(var(--path-exit),-14vh,0) scale(.7)}}
+@keyframes chirpr-enter-message {0%{opacity:0;transform:translate3d(24vw,35vh,0) scale(.5)}45%{opacity:.75;transform:translate3d(0,0,0) scale(1)}100%{opacity:0;transform:translate3d(-22vw,-18vh,0) scale(.85)}}
+@keyframes chirpr-enter-activity {0%{opacity:0;transform:scale(.08) rotate(-20deg)}40%{opacity:.87;transform:scale(1.35) rotate(5deg)}100%{opacity:0;transform:scale(1.9) rotate(26deg)}}
+@keyframes chirpr-enter-saved {0%{opacity:0;transform:translate3d(0,-40vh,0) rotateY(-88deg)}50%{opacity:.85;transform:translate3d(0,0,0) rotateY(5deg)}100%{opacity:0;transform:translate3d(0,20vh,0) rotateY(87deg)}}
+@keyframes chirpr-enter-thread {0%{opacity:0;transform:translate3d(-40vw,-20vh,0) rotate(-30deg)}60%{opacity:.75;transform:translate3d(0,0,0) rotate(28deg)}100%{opacity:0;transform:translate3d(37vw,32vh,0) rotate(90deg)}}
+@keyframes chirpr-enter-tag {0%{opacity:0;transform:scale(.1) rotate(130deg)}55%{opacity:.75;transform:scale(1.1) rotate(-10deg)}100%{opacity:0;transform:scale(.9) rotate(-80deg)}}
+@keyframes chirpr-enter-settings {0%{opacity:0;transform:scale(.5) rotate(-120deg)}53%{opacity:.7;transform:scale(1.15) rotate(0)}100%{opacity:0;transform:scale(.6) rotate(140deg)}}
+@keyframes chirpr-enter-safety {0%{opacity:0;transform:translate3d(0,40vh,0) scaleX(.25)}50%{opacity:.78;transform:translate3d(0,0,0) scaleX(1)}100%{opacity:0;transform:translate3d(0,-20vh,0) scale(1.4)}}
+@keyframes chirpr-enter-profile {0%{opacity:0;transform:scale(2.1)}43%{opacity:.64;transform:scale(.9)}100%{opacity:0;transform:scale(.55)}}
+@keyframes chirpr-enter-login {0%{opacity:0;transform:translate3d(var(--path-x),0,0) scale(.15)}47%{opacity:.8;transform:translate3d(0,0,0) scale(1)}100%{opacity:0;transform:translate3d(0,-15vh,0) scale(.8)}}
+@keyframes chirpr-enter-register {0%{opacity:0;transform:translate3d(var(--path-x),20vh,0) rotate(80deg)}50%{opacity:.8;transform:translate3d(0,0,0) rotate(0)}100%{opacity:0;transform:translate3d(0,-32vh,0) rotate(-70deg)}}
+@keyframes chirpr-enter-about {0%{opacity:0;transform:scale(.1) translateX(-60vw)}60%{opacity:.8;transform:scale(1) translateX(0)}100%{opacity:0;transform:scale(.85) translateX(35vw)}}
+@keyframes chirpr-enter-home {0%{opacity:0;transform:translate3d(0,70vh,0) rotate(-45deg)}50%{opacity:.8;transform:translate3d(0,0,0) rotate(0)}100%{opacity:0;transform:translate3d(0,-40vh,0) rotate(35deg)}}

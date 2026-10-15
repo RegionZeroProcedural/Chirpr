@@ -1,0 +1,33 @@
+CHIRPR — REELS ROUTE PORTAL (October 2026)
+
+INSTALLATION
+1. Back up your current project.
+2. Extract the patch ZIP into the Chirpr PROJECT ROOT (not into src).
+3. Permit replacement of src/App.js, src/pages/reels.jsx and src/App.css.
+4. The new src/components/ReelsRouteTransition.jsx must also be present.
+5. Restart the development server: npm start
+
+WHAT IT DOES
+- Applies when entering /reels from any other route through Links,
+  navigate(), browser Back/Forward; does not require changing each button.
+- Temporarily preserves the outgoing React Router scene under an animated
+  dark veil for 315ms, then mounts Reels behind the assembling video portal.
+- 16 freshly randomized glass fragments converge and release each entrance.
+- Existing Reels player, platform picker, saved links and live API bridge
+  are not changed. No extra dependency and no API key needed for animation.
+- Honors prefers-reduced-motion (instant navigation).
+- Optimized mobile visuals (10 shards, fewer heavyweight effects).
+
+TESTS
+1. Log in with any nonempty credentials in the demo.
+2. Navigate: Feed -> Reels; Profile -> Reels; About/Home -> Reels.
+3. Try browser Back, then Forward to Reels.
+4. Try returning to Reels multiple times; fragment paths vary each time.
+5. Test mobile-sized layout and Reduced motion OS setting.
+6. If signed out, visiting /reels still redirects to /login (existing guard).
+
+TIMING
+- Old scene held until 315ms; new scene appears behind opaque overlay.
+- Full entrance duration approximately 1.32 seconds.
+
+No server changes; the existing Reels API integration continues unchanged.

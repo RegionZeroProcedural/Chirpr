@@ -1,0 +1,28 @@
+/* Re-enable shard assembly for *all* Chirpr cards. Earlier media rules hid
+   fragments, and the real image/video must still decode only once in the base.
+   Load after App.css; no unrelated global styles are replaced. */
+.feed-card[data-has-media="yes"][data-ready="yes"] .feed-card__shards {
+  display: block !important;
+}
+.feed-card[data-has-media="yes"][data-ready="yes"]:not(.feed-card--destroying) .feed-card__base {
+  opacity: var(--base-alpha) !important;
+  transform: none !important;
+  filter: none !important;
+}
+.chirpr-attachment--shard-placeholder {
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  padding: 20px;
+  color: #b5c4e5;
+  background: linear-gradient(135deg, rgba(107,127,198,.14), rgba(74,34,130,.24));
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .11em;
+  text-align: center;
+}
+.feed-card[data-has-media="yes"] .feed-card__shard > .feed-chirp { height:100%; }
+@media (prefers-reduced-motion: reduce) {
+  .feed-card[data-has-media="yes"][data-ready="yes"] .feed-card__shards { display: none !important; }
+  .feed-card[data-has-media="yes"] .feed-card__base { opacity:1!important; transform:none!important; filter:none!important; }
+}

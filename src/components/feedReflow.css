@@ -1,0 +1,6 @@
+/* Position-only FLIP animation: the post's internal fragment animation stays independent. */
+.feed-stream, .account-stream { overflow-anchor: none; }
+.feed-reflow--moving { will-change: transform; }
+@media (prefers-reduced-motion: reduce) {
+  .feed-reflow--moving { will-change: auto; }
+}
