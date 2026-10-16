@@ -267,7 +267,7 @@ export default function Feed({ currentUser, users, onSignOut, localChirps = [], 
       </div>
       <header className="feed-topbar">
         <div className="feed-topbar__inner">
-          <Link to="/feed" className="feed-wordmark" aria-label="Chirpr feed"><span className="feed-wordmark__icon">✳</span> chirpr<span>.</span></Link>
+          <Link to="/feed" className="feed-wordmark" aria-label="Chirpr feed"><span className="feed-wordmark__icon"></span> chirpr<span>.</span></Link>
           <div className="feed-topbar__section"><span className="feed-topbar__live" /> YOUR SPACE, UNFOLDING</div>
           <div className="feed-topbar__end"><Link to="/reels" className="feed-topbar__reels-link">▣ Reels</Link><span className="feed-topbar__welcome">Hi, {currentUser.displayName}</span><button type="button" onClick={onSignOut}>Sign out <span aria-hidden="true">↗</span></button></div>
         </div>
