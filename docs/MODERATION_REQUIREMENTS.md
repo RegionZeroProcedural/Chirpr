@@ -1,31 +1,21 @@
-# Chirpr content safety — current status and production requirements
+# Chirpr moderation — automatic classification prototype
 
-## What is implemented TODAY
+**This build is a local frontend demonstration, not an approved public moderation system.** The current design reserves routine human moderator review for **reported posts** and **appeals** rather than sending every upload for manual approval. Emergency or legally required safety escalation will still need a dedicated process.
 
-1. **No auto-public uploads.** All new images, videos and demo chirps start `pending_review`. Reels' public community list will only use media carrying an explicit `approved` status. This frontend does not issue approvals. The personal "My submissions" view is an author-only browser-local preview.
-2. **Default blur and explanations.** Unreviewed media is blurred for its author, with an explicit warning and an intentional "Show media anyway" action. Other mock viewers get a quarantine placeholder with no reveal. User-declared content warnings (e.g. graphic imagery, nudity, flashing lights) produce a labeled blur even after review.
-3. **Local-only optional signal server.** `server/moderation-gateway.cjs` calls the provider's text+image classifier if configured. It can return categories and report the need for review; it **never** issues a public approval. When offline or failing, it returns pending review. API keys stay server-side.
-4. **Fail-closed videos.** Videos are not automatically approved, because a still-image classifier is not a comprehensive video or audio safety system. Videos require dedicated frame and audio checks and a human approval path.
-5. **MIME/size browser checks** plus a private IndexedDB store. This is NOT malware or security screening, nor an authenticated upload service.
+## Current implementation
 
-## What is NOT implemented yet (mandatory before real public launch)
+- A Node development gateway (`server/moderation-gateway.cjs`) uses `omni-moderation-latest` for **text and image** classification if a server-side `OPENAI_API_KEY` is configured. It produces `approved`, `sensitive`, `rejected`, or `pending_scan`, and the frontend displays the corresponding local state. There is no rule requiring routine human approval of clean images.
+- Automatically detected **sexual imagery** and **non-graphic violent imagery** are labeled and blurred. Severe classifications such as `sexual/minors` or `violence/graphic` result in rejection. Uploaders can file an **appeal** for a rejected post. The existing Report action creates a report record for the eventual human-review queue.
+- If the classifier fails, times out, is not configured, or cannot decode the file, media remains in `pending_scan` and is **not approved**.
+- For videos, the browser extracts at most five sample frames, sends those frames to the gateway, and applies warnings/blocking if a sampled frame is flagged. **A video with clean sampled frames is NOT approved:** sampled stills miss unsampled frames, moving context, and audio. Full automated video and audio screening is required before publishing to a public Reels feed.
+- Media is stored in the local browser's IndexedDB and these moderation statuses are untrusted browser metadata. No public cross-device upload authorization is implemented.
 
-- Real accounts/authentication; server-side permissions on posts, groups, membership, review roles, likes and edits. Frontend `isOwner` is not authorization.
-- Durable object storage and a server-issued upload session, content hashing, byte-level MIME validation, virus screening and quarantine. Unreviewed objects must NEVER be served from public CDN endpoints.
-- Automated text and image moderation on the SERVER. Redact/private-protect data before forwarding to external services, include privacy disclosures and retention rules. Image moderation covers only some classes of harms.
-- Full video moderation: process the entire clip, sample enough frames / keyframes, inspect thumbnails and overlays, run audio transcription plus audio safety checks and require review where uncertain. Recheck edits and re-encodes; reject unscannable files. Limit codec, dimensions, duration and frames.
-- A dedicated child-safety/CSAM detection and legal escalation workflow using specialized tools and expert/legal guidance; the generic moderation endpoint is not a substitute and must not be used for known or suspected CSAM.
-- Per-policy decisions: block illegal/exploitative uploads, route uncertain material to human review, put allowed sensitive content behind clearly labeled opt-in blur and apply age rules where required.
-- Real report/flag queues, group moderators, appeals, takedown handling, immutable audit logs, spam/rate limits, repeat-offender controls and moderator permission boundaries.
-- **Server-signed moderation decisions.** Never trust `post.attachment.moderation.status = 'approved'` from a React client or a localStorage value. Only the backend can move media from pending to approved, and only after review. Public Reels must query the backend's approved content library.
-- Privacy-preserving deletion (including all transcoded files and previews), retention controls and compliance review before beta.
+## Before launch (required)
 
-## Staged implementation plan
+1. Authenticated uploads to quarantined object storage with file hashing, size and MIME validation, malware scanning, and server-enforced moderation states. Never trust browser-submitted `approved` flags.
+2. Full-video analysis across the clip, visual overlays, subtitles, audio transcription, and audio safety analysis. Reject unscannable or unsupported content automatically. Treat GIFs/animated images and altered files similarly.
+3. Dedicated child-safety systems, suspected CSAM handling, and legal escalation. The general moderation endpoint **is not a CSAM detection tool** and must never receive known or suspected CSAM.
+4. Reporting and appeal queues with proper permissions, audit logs, rate limits, and privacy safeguards. Human involvement is designed for reports and appeals in ordinary workflows; extraordinary legal/emergency processes require specialized handling.
+5. Review moderation thresholds for false positives and misses, age protections, community guidelines, privacy disclosures, consent for classification via a third-party provider, safe retention, and independent red-team tests.
 
-**Phase 1 — Frontend prototype (this patch):** media studio, private media store, user opt-in for Reels, tagged blur, creator reels view, post mentions/hashtags, groups, paper airplane transition.
-
-**Phase 2 — Private moderated upload service:** user auth, chunked uploads, private object storage, asynchronous job queue, text/image scanning, video frame/audio workflow, content policies and human review dashboard, server-approved statuses, safe thumbnails, shared relational post database.
-
-**Phase 3 — Community/public beta:** approved Reels feed, reporting, moderator actions, group roles, content discovery/recommendations, rate limits, observability and appeal process.
-
-Do NOT advertise this frontend as already performing comprehensive content moderation. It deliberately prevents unreviewed media from entering a real public feed until the remaining work exists.
+For local setup, see `CHIRPR_REACTIONS_MESSAGES_RELEASE.md`.

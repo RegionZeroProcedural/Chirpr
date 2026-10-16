@@ -48,7 +48,7 @@ export function PageTransitionProvider({ children }) {
         if (lockedRef.current) return;
 
         if (!VISITOR_ROUTES.has(location.pathname) || !VISITOR_ROUTES.has(destination)
-            || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            || window.matchMedia('(prefers-reduced-motion: reduce), (max-width: 700px), (pointer: coarse)').matches) {
             navigate(to);
             return;
         }

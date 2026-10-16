@@ -2,7 +2,7 @@
  * In-tab, non-blocking media queue. Ownership lives outside the upload modal so
  * closing/navigating away cannot cancel an IndexedDB write or moderation request.
  * NOT a background-sync worker: leaving/reloading the tab can interrupt a task.
- * Nothing is publicly approved by this queue.
+ * Scan decisions are demo metadata only, never public authorization.
  */
 import { removeMedia, storeMedia, validateMedia } from './mediaVault.js';
 import { getModerationSignal } from './moderationClient.js';
@@ -43,14 +43,14 @@ export function enqueueMediaUpload({ file, caption = '', warning = '', alt = '',
     try {
       attachment = await storeMedia(file, warning, alt);
       update(id, { status: 'reviewing', message: 'Checking content safety…' });
-      // A scanner can only flag for review. Public distribution is never enabled here.
+      // Automatic scan results are local preview metadata, not a public authorization.
       attachment.moderation = await getModerationSignal(caption, file);
       const post = await onPublish(caption, {
         attachment, reelsOptIn: kind === 'video' && shareToReels, groupId
       });
       if (!post) throw new Error('The post could not be saved. Please try again.');
       update(id, { status: 'complete', postId: String(post.id), finishedAt: Date.now(),
-        message: 'Saved privately · Awaiting moderation' });
+        message: attachment.moderation.status === 'approved' ? 'Automatic image check passed · Local demo' : attachment.moderation.status === 'sensitive' ? 'Sensitive media detected · Blur enabled' : attachment.moderation.status === 'rejected' ? 'Media blocked by automatic safety rules' : 'Scan incomplete · Media restricted' });
       return post;
     } catch (error) {
       if (attachment?.id) await removeMedia(attachment.id).catch(() => {});

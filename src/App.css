@@ -1536,7 +1536,7 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid 
 .feed-topbar__inner { width:min(1380px,calc(100% - 72px));height:100%;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:25px; }
 .feed-wordmark { display:flex;align-items:center;gap:11px;color:#fff;text-decoration:none;font-weight:800;font-size:27px;letter-spacing:-1.8px; }
 .feed-wordmark > span:last-child {color:#8db4ff;margin-left:-9px;}
-.feed-wordmark__icon {display:block;flex:none;width: 58px !important;height:58px !important;background:url('./assets/chirpr-logo.png') center / contain no-repeat;}
+.feed-wordmark__icon {display:block;flex:none;width:37px;height:37px;background:url('./assets/chirpr-logo.png') center / contain no-repeat;}
 .feed-topbar__section { font-size:10px;letter-spacing:1.9px;font-weight:800;color:#8f9fcb;display:flex;align-items:center;gap:12px; }
 .feed-topbar__live {width:7px;height:7px;border-radius:50%;background:#9e9dfc;box-shadow:0 0 0 6px rgba(140,124,250,.085),0 0 16px rgba(135,156,251,.45);}
 .feed-topbar__end { display:flex;gap:20px;align-items:center;font-size:12px; }
@@ -3359,7 +3359,6 @@ html *::-webkit-scrollbar, body *::-webkit-scrollbar {
   .chirpr-upload-modal h2 { font-size: clamp(24px, 6vw, 30px); }
   .chirpr-upload-modal__footer { gap: 8px; }
   .chirpr-upload-modal__footer button { padding: 11px 12px; }
-  .feed-wordmark__icon {display:block;flex:none;width: 48px !important;height:48px !important;}
 }
 
 
@@ -3414,4 +3413,76 @@ html *::-webkit-scrollbar, body *::-webkit-scrollbar {
 @media (max-width:700px), (pointer:coarse) {
   .feed-card__shard-paint::after { opacity:1; }
   .feed-card[data-animating='yes'] .feed-card__shards { opacity: min(1, calc(var(--shard-alpha) * 1.5)); }
+}
+
+/* Efficient mobile route transitions. These rules intentionally leave all
+   desktop cinema and the reversible scroll shard effect unchanged. */
+@media (max-width:700px), (pointer:coarse) {
+  .reels-route-portal--lite {background:rgba(10,14,31,.95);animation:chirpr-lite-portal .43s ease-out both;}
+  .reels-route-portal--lite .reels-route-portal__gate,
+  .reels-route-portal--lite .reels-route-portal__orbit,
+  .reels-route-portal--lite .reels-route-portal__horizon,
+  .reels-route-portal--lite .reels-route-portal__fragments {display:none!important;}
+  .reels-route-portal--lite .reels-route-portal__veil {animation:none!important;background:rgba(12,15,36,.95)!important;}
+  .reels-route-portal--lite .reels-route-portal__title {transform:translate(-50%,-50%);animation:chirpr-lite-portal .43s ease-out both;}
+  .reels-route-portal--lite .reels-route-portal__title strong {font-size:24px;}
+  .profile-reveal--lite {animation:chirpr-lite-profile .36s ease-out both;}
+  .profile-reveal--lite .profile-reveal__curtain,
+  .profile-reveal--lite .profile-reveal__flare,
+  .profile-reveal--lite .profile-reveal__fragments {display:none!important;}
+  .profile-reveal--lite .profile-reveal__core {animation:none!important;}
+  .profile-reveal--lite .profile-reveal__core span {font-size:30px;}
+}
+@keyframes chirpr-lite-portal {0%{opacity:0}34%{opacity:1}100%{opacity:0}}
+@keyframes chirpr-lite-profile {0%{opacity:0}38%{opacity:.85}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce) {
+  .reels-route-portal--lite,.profile-reveal--lite {display:none!important;}
+}
+
+/* Guest preview — understated glass secondary action on all visitor pages. */
+.chirpr-guest-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  text-align: center;
+}
+.chirpr-guest-entry__label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  color: #a8b8d8;
+}
+.chirpr-guest-entry > small {
+  color: #8e9ebd;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.chirpr-guest-button,
+.landing-page .chirpr-guest-button,
+.login-page .chirpr-guest-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 47px;
+  padding: 11px 18px;
+  border: 1px solid rgba(175,203,255,.32);
+  border-radius: 12px;
+  color: #e8f1ff;
+  background: linear-gradient(115deg, rgba(99,134,201,.16), rgba(143,115,212,.12));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.20), 0 6px 18px rgba(4,10,33,.18);
+  -webkit-backdrop-filter: blur(16px) saturate(145%);
+  backdrop-filter: blur(16px) saturate(145%);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.chirpr-guest-button__icon { color: #9edaff; font-size: 19px; }
+.chirpr-guest-button__arrow { color: #c4adff; font-size: 17px; }
+.chirpr-guest-button:disabled { opacity: .55; cursor: progress; }
+@media (prefers-reduced-motion: reduce) {
+  .chirpr-guest-button, .chirpr-guest-button::after { transition: none !important; animation: none !important; }
 }

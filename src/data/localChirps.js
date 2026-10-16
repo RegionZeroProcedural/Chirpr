@@ -36,7 +36,7 @@ export function makeLocalChirp(uid, text, options = {}) {
     attachment: options.attachment ?? null,
     reelsOptIn: options.attachment?.kind === 'video' && options.reelsOptIn === true,
     groupId: options.groupId || null,
-    moderationStatus: options.attachment ? 'pending_review' : 'pending_review',
+    moderationStatus: options.attachment?.moderation?.status || 'approved',
     age: 'now',
     topic: 'JUST CHIRPED',
     likes: 0,

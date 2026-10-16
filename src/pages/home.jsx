@@ -1,5 +1,6 @@
 import useDemoSignIn from '../components/useDemoSignIn.js';
 import AuthDissolveParticles from '../components/AuthDissolveParticles.jsx';
+import GuestSignInButton from '../components/GuestSignInButton.jsx';
 import { TransitionLink } from '../components/PageTransitions.jsx';
 
 import Background from '../components/background.jsx';
@@ -9,8 +10,8 @@ import LoginButton from '../components/loginButton.jsx';
 import RegisterButton from '../components/registerButton.jsx';
 import AboutButton from '../components/aboutButton.jsx';
 
-export default function Home({ onDemoSignIn }) {
-    const { dissolving, handleSubmit } = useDemoSignIn(onDemoSignIn);
+export default function Home({ onDemoSignIn, onGuestSignIn }) {
+    const { dissolving, handleSubmit, handleGuestSignIn } = useDemoSignIn(onDemoSignIn, onGuestSignIn);
     return (
         <main className={`landing-page ${dissolving ? 'chirpr-auth-dissolving' : ''}`} data-transition-page>
             <AuthDissolveParticles active={dissolving} />
@@ -77,6 +78,11 @@ export default function Home({ onDemoSignIn }) {
                                 </div>
                                 <p className="landing-auth__demo-note">Demo mode · Any credentials work</p>
                             </form>
+                            <div className="chirpr-guest-entry">
+                                <span className="chirpr-guest-entry__label">NO ACCOUNT? NO PROBLEM.</span>
+                                <GuestSignInButton onClick={handleGuestSignIn} disabled={dissolving} />
+                                <small>Explore Chirpr without entering credentials.</small>
+                            </div>
                             <div className="landing-auth__divider"><span>NEW AROUND HERE?</span></div>
                             <div className="landing-auth__register">
                                 <RegisterButton />

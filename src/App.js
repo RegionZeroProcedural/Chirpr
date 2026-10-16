@@ -1,5 +1,6 @@
 import './App.css';
 import './features/social/social.css';
+import './features/social/socialInteractions.css';
 import './components/destinationTransitions.css';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
@@ -11,6 +12,7 @@ import Account from './pages/account.jsx'
 import EditProfileSettings from './pages/editProfileSettings.jsx';
 import EditProfileDetails from './pages/editProfileDetails.jsx'
 import { users } from './users/users.js';
+import { GUEST_MODE_KEY, GUEST_UID, GUEST_USER, isGuestMode } from './data/guestSession.js';
 import { demoFeed } from './data/demoFeed.js';
 import About from './pages/about.jsx'
 import { PageTransitionProvider } from './components/PageTransitions.jsx'
@@ -37,43 +39,57 @@ function ChirprRoutes() {
   const [profileDetailsByUid, setProfileDetailsByUid] = useState(loadProfileDetails);
   const [registeredUsers, setRegisteredUsers] = useState(() => { try { return JSON.parse(window.localStorage.getItem('chirpr-demo-registered-users') || '[]'); } catch { return []; } });
   const [viewerUid, setViewerUid] = useState(() => window.sessionStorage.getItem('chirpr-demo-viewer') || '1');
-  const allUsers = useMemo(() => mergeProfileDetails([...users, ...registeredUsers], profileDetailsByUid), [profileDetailsByUid, registeredUsers]);
-  const currentUser = allUsers.find(user => String(user.uid) === String(viewerUid)) || allUsers[0];
   const [demoSignedIn, setDemoSignedIn] = useState(() => window.sessionStorage.getItem('chirpr-demo-signed-in') === '1');
+  const [guestMode, setGuestMode] = useState(() => isGuestMode(window.sessionStorage));
+  const [guestProfile, setGuestProfile] = useState({});
+  const [guestPosts, setGuestPosts] = useState([]);
+  const allUsers = useMemo(() => {
+    const savedUsers = mergeProfileDetails([...users, ...registeredUsers], profileDetailsByUid);
+    return guestMode ? [...savedUsers, { ...GUEST_USER, ...guestProfile }] : savedUsers;
+  }, [profileDetailsByUid, registeredUsers, guestMode, guestProfile]);
+  const currentUser = allUsers.find(user => String(user.uid) === String(viewerUid)) || (guestMode ? allUsers[allUsers.length - 1] : allUsers[0]);
   const [appearancesByUid, setAppearancesByUid] = useState(loadAppearances);
   const [localChirps, setLocalChirps] = useState(loadLocalChirps);
-  const sharedPosts = useMemo(() => [...localChirps, ...demoFeed], [localChirps]);
+  // Guest posts are memory-only; signed-in demo accounts retain their normal saved posts.
+  const visibleChirps = useMemo(() => guestMode ? [...guestPosts, ...localChirps] : localChirps, [guestMode, guestPosts, localChirps]);
+  const sharedPosts = useMemo(() => [...visibleChirps, ...demoFeed], [visibleChirps]);
   const [postPreferences, setPostPreferences] = useState(loadPostPreferences);
   const [groups, setGroups] = useState(loadGroups);
+  const persistGroups = next => { if (!guestMode) saveGroups(next); return next; };
   const createGroup = (name, description, options = {}) => {
     const group = makeGroup(name, description, currentUser.uid, options);
-    setGroups(old => { const next = [group,...old]; saveGroups(next); return next; });
+    setGroups(old => { const next = [group,...old]; persistGroups(next); return next; });
   };
-  const joinGroup = id => { setGroups(old => { const next = old.map(group => group.id !== id ? group : group.private && String(group.ownerUid) !== String(currentUser.uid) ? { ...group, pendingMemberUids: [...new Set([...(group.pendingMemberUids || []), currentUser.uid])] } : { ...group, memberUids: [...new Set([...group.memberUids, currentUser.uid])] }); saveGroups(next); return next; }); };
+  const joinGroup = id => { setGroups(old => { const next = old.map(group => group.id !== id ? group : group.private && String(group.ownerUid) !== String(currentUser.uid) ? { ...group, pendingMemberUids: [...new Set([...(group.pendingMemberUids || []), currentUser.uid])] } : { ...group, memberUids: [...new Set([...group.memberUids, currentUser.uid])] }); persistGroups(next); return next; }); };
   const updateGroup = (id, changes) => setGroups(old => {
     const next = old.map(group => group.id === id && String(group.ownerUid) === String(currentUser.uid) ? { ...group, ...changes, ownerUid: group.ownerUid, id: group.id } : group);
-    saveGroups(next); return next;
+    persistGroups(next); return next;
   });
-  const leaveGroup = id => { setGroups(old => { const next = old.map(group => group.id === id && group.ownerUid !== currentUser.uid ? {...group, memberUids: group.memberUids.filter(uid => uid !== currentUser.uid)} : group); saveGroups(next); return next; }); };
+  const leaveGroup = id => { setGroups(old => { const next = old.map(group => group.id === id && group.ownerUid !== currentUser.uid ? {...group, memberUids: group.memberUids.filter(uid => uid !== currentUser.uid)} : group); persistGroups(next); return next; }); };
   useEffect(() => { const sync = e => { if (e.key === GROUPS_KEY) setGroups(loadGroups()); }; window.addEventListener('storage', sync); return () => window.removeEventListener('storage', sync); }, []);
 
   const changePostPreferences = useCallback(update => {
     setPostPreferences(previous => {
       const next = update(previous);
-      savePostPreferences(next);
+      if (!guestMode) savePostPreferences(next);
       return next;
     });
-  }, []);
+  }, [guestMode]);
   const editPost = useCallback((id, text) => {
     if (!currentUser || !text.trim()) return;
-    const original = [...localChirps, ...demoFeed].find(post => String(post.id) === String(id));
+    const original = [...visibleChirps, ...demoFeed].find(post => String(post.id) === String(id));
     if (!original || String(original.uid) !== String(currentUser.uid)) return;
     changePostPreferences(previous => ({ ...previous, edits: { ...previous.edits, [String(id)]: text.trim().slice(0, 500) } }));
-  }, [currentUser, localChirps, changePostPreferences]);
+  }, [currentUser, visibleChirps, changePostPreferences]);
   const deletePost = useCallback(id => {
-    const original = [...localChirps, ...demoFeed].find(post => String(post.id) === String(id));
+    const original = [...visibleChirps, ...demoFeed].find(post => String(post.id) === String(id));
     if (!original || String(original.uid) !== String(currentUser?.uid)) return;
     changePostPreferences(previous => ({ ...previous, deleted: [...new Set([...previous.deleted, String(id)])] }));
+    if (guestMode && guestPosts.some(post => String(post.id) === String(id))) {
+      setGuestPosts(previous => previous.filter(post => String(post.id) !== String(id)));
+      if (original.attachment?.id) removeMedia(original.attachment.id).catch(() => {});
+      return;
+    }
     if (localChirps.some(post => String(post.id) === String(id))) {
       setLocalChirps(previous => {
         const next = previous.filter(post => String(post.id) !== String(id));
@@ -82,7 +98,7 @@ function ChirprRoutes() {
       });
       if (original.attachment?.id) removeMedia(original.attachment.id).catch(() => {});
     }
-  }, [currentUser, localChirps, changePostPreferences]);
+  }, [currentUser, visibleChirps, localChirps, guestPosts, guestMode, changePostPreferences]);
   const hidePost = useCallback(id => changePostPreferences(previous => ({ ...previous, hidden: [...new Set([...previous.hidden, String(id)])] })), [changePostPreferences]);
   const savePost = useCallback(id => changePostPreferences(previous => {
     const value = String(id);
@@ -93,32 +109,37 @@ function ChirprRoutes() {
   const publishChirp = useCallback((text, options = {}) => {
     if (!demoSignedIn || !currentUser || (!text.trim() && !options.attachment)) return null;
     const post = makeLocalChirp(currentUser.uid, text, options);
+    if (guestMode) {
+      setGuestPosts(previous => [post, ...previous]);
+      return post;
+    }
     setLocalChirps(previous => {
       const next = [post, ...previous];
       saveLocalChirps(next);
       return next;
     });
     return post;
-  }, [demoSignedIn, currentUser]);
+  }, [demoSignedIn, currentUser, guestMode]);
 
   const updateProfileDetails = useCallback((uid, values) => {
     if (!demoSignedIn || String(uid) !== String(currentUser?.uid)) return false;
+    if (guestMode) { setGuestProfile(normalizeProfileDetails(values)); return true; }
     const next = { ...profileDetailsByUid, [String(uid)]: normalizeProfileDetails(values) };
     // Persist before changing React state, so a quota error is not silently lost.
     if (!saveProfileDetails(next)) return false;
     setProfileDetailsByUid(next);
     return true;
-  }, [demoSignedIn, currentUser?.uid, profileDetailsByUid]);
+  }, [demoSignedIn, currentUser?.uid, profileDetailsByUid, guestMode]);
 
   const updateAppearance = useCallback((uid, nextAppearance) => {
     // A frontend-only control: only the demo signed-in user may edit their theme.
     if (!demoSignedIn || String(uid) !== String(currentUser?.uid)) return;
     setAppearancesByUid(previous => {
       const updated = { ...previous, [uid]: normalizeAppearance(nextAppearance) };
-      saveAppearances(updated);
+      if (!guestMode) saveAppearances(updated);
       return updated;
     });
-  }, [demoSignedIn, currentUser]);
+  }, [demoSignedIn, currentUser, guestMode]);
 
   useEffect(() => {
     const sync = event => {
@@ -140,23 +161,53 @@ function ChirprRoutes() {
   }, []);
   const changeAccount = useCallback(uid => {
     if (!allUsers.some(user => String(user.uid) === String(uid))) return;
+    if (String(uid) !== GUEST_UID && guestMode) {
+      window.sessionStorage.removeItem(GUEST_MODE_KEY);
+      setGuestMode(false);
+      setGuestPosts([]);
+      setGuestProfile({});
+      setPostPreferences(loadPostPreferences());
+      setGroups(loadGroups());
+      setAppearancesByUid(loadAppearances());
+    }
     window.sessionStorage.setItem('chirpr-demo-viewer', String(uid));
     setViewerUid(String(uid));
     navigate('/feed');
-  }, [allUsers, navigate]);
+  }, [allUsers, navigate, guestMode]);
   const registerDemo = useCallback(values => {
     const username = String(values.username || '').trim().toLowerCase();
-    if (!/^[a-z0-9_]{3,20}$/.test(username) || allUsers.some(user => user.username.toLowerCase() === username)) return false;
+    if (!/^[a-z0-9_]{3,20}$/.test(username) || username === GUEST_USER.username || allUsers.some(user => user.username.toLowerCase() === username)) return false;
     const user = { uid: `demo-${Date.now()}`, username, displayName: values.displayName || username, bio: '', joined: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }), chirps: [] };
     const next = [...registeredUsers, user];
     try { window.localStorage.setItem('chirpr-demo-registered-users', JSON.stringify(next)); } catch { return false; }
+    window.sessionStorage.removeItem(GUEST_MODE_KEY);
+    setGuestMode(false); setGuestPosts([]); setGuestProfile({});
+    setPostPreferences(loadPostPreferences()); setGroups(loadGroups()); setAppearancesByUid(loadAppearances());
     setRegisteredUsers(next); setViewerUid(String(user.uid));
     window.sessionStorage.setItem('chirpr-demo-viewer', String(user.uid));
     window.sessionStorage.setItem('chirpr-demo-signed-in', '1'); setDemoSignedIn(true); navigate('/feed');
     return true;
   }, [allUsers, registeredUsers, navigate]);
   const signIn = useCallback(() => {
+    window.sessionStorage.removeItem(GUEST_MODE_KEY);
+    setGuestMode(false); setGuestPosts([]); setGuestProfile({});
+    if (String(viewerUid) === GUEST_UID) {
+      window.sessionStorage.setItem('chirpr-demo-viewer', '1');
+      setViewerUid('1');
+    }
     window.sessionStorage.setItem('chirpr-demo-signed-in', '1');
+    setDemoSignedIn(true);
+    navigate('/feed');
+  }, [navigate, viewerUid]);
+
+  const signInAsGuest = useCallback(() => {
+    window.sessionStorage.setItem('chirpr-demo-viewer', GUEST_UID);
+    window.sessionStorage.setItem('chirpr-demo-signed-in', '1');
+    window.sessionStorage.setItem(GUEST_MODE_KEY, '1');
+    setGuestPosts([]); setGuestProfile({});
+    setPostPreferences(loadPostPreferences()); setGroups(loadGroups()); setAppearancesByUid(loadAppearances());
+    setViewerUid(GUEST_UID);
+    setGuestMode(true);
     setDemoSignedIn(true);
     navigate('/feed');
   }, [navigate]);
@@ -168,6 +219,15 @@ function ChirprRoutes() {
     if (signOutTimer.current) return;
     const finish = () => {
       window.sessionStorage.removeItem('chirpr-demo-signed-in');
+      window.sessionStorage.removeItem(GUEST_MODE_KEY);
+      if (guestMode) {
+        guestPosts.forEach(post => { if (post.attachment?.id) removeMedia(post.attachment.id).catch(() => {}); });
+        window.sessionStorage.removeItem('chirpr-demo-viewer');
+        setViewerUid('1');
+        setGuestPosts([]); setGuestProfile({});
+        setPostPreferences(loadPostPreferences()); setGroups(loadGroups()); setAppearancesByUid(loadAppearances());
+      }
+      setGuestMode(false);
       setDemoSignedIn(false);
       navigate('/', { replace: true });
       setSigningOut(false);
@@ -179,26 +239,26 @@ function ChirprRoutes() {
     }
     setSigningOut(true);
     signOutTimer.current = window.setTimeout(finish, 690);
-  }, [navigate]);
+  }, [navigate, guestMode, guestPosts]);
 
   return (
     <PageTransitionProvider>
-      <SocialProvider currentUser={demoSignedIn ? currentUser : null} users={allUsers} posts={sharedPosts}>
+      <SocialProvider key={guestMode ? 'guest-preview' : 'normal-demo'} guestMode={guestMode} currentUser={demoSignedIn ? currentUser : null} users={allUsers} posts={sharedPosts}>
       <UploadActivityLayer />
       <DestinationTransitions />
       <SignOutTransition active={signingOut} />
       {demoSignedIn && <SocialDock />}
       <ReelsRouteTransition signedIn={demoSignedIn}>
         {renderedLocation => <Routes location={renderedLocation}>
-        <Route path='/' element={ <Home onDemoSignIn={signIn} /> } />
-        <Route path='/home' element={ <Home onDemoSignIn={signIn} /> } />
-        <Route path='/register' element={ <Register users={allUsers} onRegister={registerDemo} /> } />
-        <Route path='/login' element={ <Login onDemoSignIn={signIn} /> } />
-        <Route path='/feed' element={ demoSignedIn ? <Feed currentUser={currentUser} users={allUsers} onSignOut={signOut} appearancesByUid={appearancesByUid} localChirps={localChirps} onCreateChirp={publishChirp} postPreferences={postPreferences} onEditPost={editPost} onDeletePost={deletePost} onHidePost={hidePost} onSavePost={savePost} /> : <Navigate to='/login' replace /> } />
-        <Route path='/reels' element={ demoSignedIn ? <Reels currentUser={currentUser} users={allUsers} localChirps={localChirps} appearancesByUid={appearancesByUid} postPreferences={postPreferences} onSavePost={savePost} /> : <Navigate to='/login' replace /> } />
-        <Route path='/groups' element={demoSignedIn ? <Groups currentUser={currentUser} users={allUsers} groups={groups} onCreateGroup={createGroup} onUpdateGroup={updateGroup} onJoinGroup={joinGroup} onLeaveGroup={leaveGroup} localChirps={localChirps} onCreateChirp={publishChirp} postPreferences={postPreferences} appearancesByUid={appearancesByUid} onSavePost={savePost} /> : <Navigate to='/login' replace />} />
-        <Route path='/groups/:groupId' element={demoSignedIn ? <Groups currentUser={currentUser} users={allUsers} groups={groups} onCreateGroup={createGroup} onUpdateGroup={updateGroup} onJoinGroup={joinGroup} onLeaveGroup={leaveGroup} localChirps={localChirps} onCreateChirp={publishChirp} postPreferences={postPreferences} appearancesByUid={appearancesByUid} onSavePost={savePost} /> : <Navigate to='/login' replace />} />
-        <Route path='/tags/:tag' element={demoSignedIn ? <HashtagPage currentUser={currentUser} users={allUsers} localChirps={localChirps} appearancesByUid={appearancesByUid} postPreferences={postPreferences} onSavePost={savePost} /> : <Navigate to='/login' replace />} />
+        <Route path='/' element={ <Home onDemoSignIn={signIn} onGuestSignIn={signInAsGuest} /> } />
+        <Route path='/home' element={ <Home onDemoSignIn={signIn} onGuestSignIn={signInAsGuest} /> } />
+        <Route path='/register' element={ <Register users={allUsers} onRegister={registerDemo} onGuestSignIn={signInAsGuest} /> } />
+        <Route path='/login' element={ <Login onDemoSignIn={signIn} onGuestSignIn={signInAsGuest} /> } />
+        <Route path='/feed' element={ demoSignedIn ? <Feed currentUser={currentUser} users={allUsers} onSignOut={signOut} appearancesByUid={appearancesByUid} localChirps={visibleChirps} onCreateChirp={publishChirp} postPreferences={postPreferences} onEditPost={editPost} onDeletePost={deletePost} onHidePost={hidePost} onSavePost={savePost} /> : <Navigate to='/login' replace /> } />
+        <Route path='/reels' element={ demoSignedIn ? <Reels currentUser={currentUser} users={allUsers} localChirps={visibleChirps} appearancesByUid={appearancesByUid} postPreferences={postPreferences} onSavePost={savePost} /> : <Navigate to='/login' replace /> } />
+        <Route path='/groups' element={demoSignedIn ? <Groups currentUser={currentUser} users={allUsers} groups={groups} onCreateGroup={createGroup} onUpdateGroup={updateGroup} onJoinGroup={joinGroup} onLeaveGroup={leaveGroup} localChirps={visibleChirps} onCreateChirp={publishChirp} postPreferences={postPreferences} appearancesByUid={appearancesByUid} onSavePost={savePost} /> : <Navigate to='/login' replace />} />
+        <Route path='/groups/:groupId' element={demoSignedIn ? <Groups currentUser={currentUser} users={allUsers} groups={groups} onCreateGroup={createGroup} onUpdateGroup={updateGroup} onJoinGroup={joinGroup} onLeaveGroup={leaveGroup} localChirps={visibleChirps} onCreateChirp={publishChirp} postPreferences={postPreferences} appearancesByUid={appearancesByUid} onSavePost={savePost} /> : <Navigate to='/login' replace />} />
+        <Route path='/tags/:tag' element={demoSignedIn ? <HashtagPage currentUser={currentUser} users={allUsers} localChirps={visibleChirps} appearancesByUid={appearancesByUid} postPreferences={postPreferences} onSavePost={savePost} /> : <Navigate to='/login' replace />} />
         <Route path='/about' element={ <About />} />
         <Route path='/discover' element={demoSignedIn ? <DiscoverPage appearancesByUid={appearancesByUid} postPreferences={postPreferences} /> : <Navigate to='/login' replace />} />
         <Route path='/notifications' element={demoSignedIn ? <NotificationsPage /> : <Navigate to='/login' replace />} />
@@ -208,9 +268,9 @@ function ChirprRoutes() {
         <Route path='/chirp/:postId' element={demoSignedIn ? <ChirpDetailPage postPreferences={postPreferences} appearancesByUid={appearancesByUid} onSavePost={savePost} /> : <Navigate to='/login' replace />} />
         <Route path='/settings' element={demoSignedIn ? <SettingsPage onSignOut={signOut} onChangeAccount={changeAccount} currentUser={currentUser} users={allUsers} /> : <Navigate to='/login' replace />} />
         <Route path='/safety' element={demoSignedIn ? <SafetyPage /> : <Navigate to='/login' replace />} />
-        <Route path='/users/:uname' element={ <Account currentUser={demoSignedIn ? currentUser : null} users={allUsers} appearancesByUid={appearancesByUid} onAppearanceChange={updateAppearance} localChirps={localChirps} onCreateChirp={publishChirp} postPreferences={postPreferences} onEditPost={editPost} onDeletePost={deletePost} onHidePost={hidePost} onSavePost={savePost} /> } />
-        <Route path='/account' element={ <Account currentUser={demoSignedIn ? currentUser : null} users={allUsers} appearancesByUid={appearancesByUid} onAppearanceChange={updateAppearance} localChirps={localChirps} onCreateChirp={publishChirp} postPreferences={postPreferences} onEditPost={editPost} onDeletePost={deletePost} onHidePost={hidePost} onSavePost={savePost} /> } />
-        <Route path="/profileSettings/:uid" element={<EditProfileSettings currentUser={demoSignedIn ? currentUser : null} />} />
+        <Route path='/users/:uname' element={ <Account currentUser={demoSignedIn ? currentUser : null} users={allUsers} appearancesByUid={appearancesByUid} onAppearanceChange={updateAppearance} localChirps={visibleChirps} onCreateChirp={publishChirp} postPreferences={postPreferences} onEditPost={editPost} onDeletePost={deletePost} onHidePost={hidePost} onSavePost={savePost} /> } />
+        <Route path='/account' element={ <Account currentUser={demoSignedIn ? currentUser : null} users={allUsers} appearancesByUid={appearancesByUid} onAppearanceChange={updateAppearance} localChirps={visibleChirps} onCreateChirp={publishChirp} postPreferences={postPreferences} onEditPost={editPost} onDeletePost={deletePost} onHidePost={hidePost} onSavePost={savePost} /> } />
+        <Route path="/profileSettings/:uid" element={<EditProfileSettings currentUser={demoSignedIn ? currentUser : null} onChangeAccount={changeAccount} onSignOut={signOut} />} />
         <Route path='/editProfileDetails/:uid' element={<EditProfileDetails currentUser={demoSignedIn ? currentUser : null} users={allUsers} appearancesByUid={appearancesByUid} onAppearanceChange={updateAppearance} onProfileChange={updateProfileDetails} />} />
         </Routes>}
       </ReelsRouteTransition>

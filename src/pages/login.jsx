@@ -3,11 +3,12 @@ import useDemoSignIn from '../components/useDemoSignIn.js';
 import AuthDissolveParticles from '../components/AuthDissolveParticles.jsx';
 import { TransitionLink } from '../components/PageTransitions.jsx';
 import LoginBox from '../components/loginBox.jsx';
+import GuestSignInButton from '../components/GuestSignInButton.jsx';
 
-export default function Login({ onDemoSignIn }) {
+export default function Login({ onDemoSignIn, onGuestSignIn }) {
     const [feedback, setFeedback] = useState('');
 
-    const { dissolving, handleSubmit } = useDemoSignIn(onDemoSignIn);
+    const { dissolving, handleSubmit, handleGuestSignIn } = useDemoSignIn(onDemoSignIn, onGuestSignIn);
 
     return (
         <main className={`login-page ${dissolving ? 'chirpr-auth-dissolving' : ''}`} data-transition-page>
@@ -74,6 +75,11 @@ export default function Login({ onDemoSignIn }) {
                         </button>
                         {feedback && <p className="login-page__feedback" role="status">{feedback}</p>}
                     </form>
+                    <div className="chirpr-guest-entry">
+                        <span className="chirpr-guest-entry__label">JUST EXPLORING?</span>
+                        <GuestSignInButton onClick={handleGuestSignIn} disabled={dissolving} />
+                        <small>No username or password required.</small>
+                    </div>
 
                     <div className="login-page__divider"><span>NEW TO CHIRPR?</span></div>
                     <TransitionLink className="login-page__create chirpr-hover-glow" to="/register">

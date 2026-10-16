@@ -40,9 +40,9 @@ function createPortalShards() {
   });
 }
 
-function ReelsPortal({ shards }) {
+function ReelsPortal({ shards, lite = false }) {
   return (
-    <div className="reels-route-portal" aria-hidden="true">
+    <div className={`reels-route-portal${lite ? ' reels-route-portal--lite' : ''}`} aria-hidden="true">
       <div className="reels-route-portal__veil" />
       <div className="reels-route-portal__horizon" />
       <div className="reels-route-portal__orbit reels-route-portal__orbit--wide" />
@@ -94,18 +94,19 @@ export default function ReelsRouteTransition({ signedIn, children }) {
       return;
     }
 
-    setPortal({ id: location.key, shards: createPortalShards() });
+    const mobile = window.matchMedia?.('(max-width: 700px), (pointer: coarse)').matches;
+    setPortal({ id: location.key, lite: mobile, shards: mobile ? [] : createPortalShards() });
 
     // Mount Reels only once the portal has hidden the previous scene.
     swapTimerRef.current = window.setTimeout(() => {
       displayedRef.current = location;
       setRenderedLocation(location);
       window.scrollTo(0, 0);
-    }, SCENE_SWAP_MS);
+    }, mobile ? 158 : SCENE_SWAP_MS);
 
     finishTimerRef.current = window.setTimeout(() => {
       setPortal(null);
-    }, PORTAL_DURATION_MS);
+    }, mobile ? 430 : PORTAL_DURATION_MS);
 
     // Cleanup prevents stale route swaps if navigation changes mid-transition.
     return () => {
@@ -117,7 +118,7 @@ export default function ReelsRouteTransition({ signedIn, children }) {
   return (
     <>
       {children(renderedLocation)}
-      {portal && <ReelsPortal key={portal.id} shards={portal.shards} />}
+      {portal && <ReelsPortal key={portal.id} shards={portal.shards} lite={portal.lite} />}
     </>
   );
 }

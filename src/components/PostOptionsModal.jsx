@@ -15,6 +15,7 @@ export default function PostOptionsModal({ post, author, currentUser, appearance
   const [message, setMessage] = useState('');
   const panelRef = useRef(null);
   const closeRef = useRef(null);
+  const isRechirp = !!post.originalPostId || String(post.id).startsWith('rechirp-');
   const owner = Boolean(currentUser && String(currentUser.uid) === String(post.uid));
   const theme = normalizeAppearance(appearance);
   const themeLabel = THEME_PRESETS.find(preset => preset.id === theme.theme)?.label ?? 'Aurora';
@@ -95,7 +96,7 @@ export default function PostOptionsModal({ post, author, currentUser, appearance
           <div className="chirp-options__menu">
             {owner ? <>
               <button className="chirp-options__item" type="button" onClick={() => setMode('edit')}><span className="chirp-options__icon">✎</span><span><strong>Edit chirp</strong><small>Update what you shared</small></span><b>↗</b></button>
-              <button className="chirp-options__item" type="button" onClick={() => setMode('delete')}><span className="chirp-options__icon chirp-options__icon--danger">⌫</span><span><strong>Delete chirp</strong><small>Remove it from the demo feed</small></span><b>↗</b></button>
+              <button className="chirp-options__item" type="button" onClick={() => setMode('delete')}><span className="chirp-options__icon chirp-options__icon--danger">⌫</span><span><strong>{isRechirp ? "Remove rechirp" : "Delete chirp"}</strong><small>Remove it from the demo feed</small></span><b>↗</b></button>
             </> : <>
               {author?.username && <Link className="chirp-options__item" to={`/users/${author.username}`} onClick={() => setClosing(true)}><span className="chirp-options__icon">◉</span><span><strong>View @{author.username}</strong><small>Explore their personalized profile</small></span><b>↗</b></Link>}
               <button className="chirp-options__item" type="button" onClick={hidePost}><span className="chirp-options__icon">◌</span><span><strong>Hide this chirp</strong><small>Remove it from your preview</small></span><b>↗</b></button>

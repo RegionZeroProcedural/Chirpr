@@ -89,3 +89,12 @@
 @keyframes chirpr-enter-register {0%{opacity:0;transform:translate3d(var(--path-x),20vh,0) rotate(80deg)}50%{opacity:.8;transform:translate3d(0,0,0) rotate(0)}100%{opacity:0;transform:translate3d(0,-32vh,0) rotate(-70deg)}}
 @keyframes chirpr-enter-about {0%{opacity:0;transform:scale(.1) translateX(-60vw)}60%{opacity:.8;transform:scale(1) translateX(0)}100%{opacity:0;transform:scale(.85) translateX(35vw)}}
 @keyframes chirpr-enter-home {0%{opacity:0;transform:translate3d(0,70vh,0) rotate(-45deg)}50%{opacity:.8;transform:translate3d(0,0,0) rotate(0)}100%{opacity:0;transform:translate3d(0,-40vh,0) rotate(35deg)}}
+
+/* Mobile route entrances: one inexpensive composited tint + title, never a
+   multi-shape fullscreen sequence competing with scroll/video decoding. */
+.chirpr-destination--lite {animation:chirpr-lite-entrance .31s ease-out both;}
+.chirpr-destination--lite .chirpr-destination__glimmer {opacity:.28;}
+.chirpr-destination--lite .chirpr-destination__identity {animation:chirpr-lite-title .31s ease-out both;}
+.chirpr-destination--lite .chirpr-destination__identity b {font-size:30px;}
+@keyframes chirpr-lite-entrance {0%{opacity:0}38%{opacity:.72}100%{opacity:0}}
+@keyframes chirpr-lite-title {0%{opacity:0;transform:translate(-50%,-47%) scale(.95)}50%{opacity:1}100%{opacity:0;transform:translate(-50%,-51%) scale(1)}}

@@ -2,6 +2,7 @@ import { useSocial } from '../features/social/SocialStore.jsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { demoFeed } from '../data/demoFeed.js';
+import { getRechirps } from '../data/rechirps.js';
 import { FragmentChirp, TextChirpFlightOverlay } from './feed.jsx';
 import { useTextChirpFlight } from '../components/useTextChirpFlight.js';
 import PostOptionsModal from '../components/PostOptionsModal.jsx';
@@ -130,11 +131,16 @@ export default function Account({ currentUser, users, appearancesByUid = {}, onA
     ];
     return applyPostPreferences(originals, postPreferences);
   }, [localChirps, postPreferences, profileUser, uid]);
-  const visiblePosts = activeTab === 'media' ? posts.filter(post => !!post.media || !!post.attachment) :
+  const allOriginals = useMemo(() => [...localChirps.filter(post => !post.groupId), ...demoFeed], [localChirps]);
+  const myRechirps = useMemo(() => applyPostPreferences(
+    getRechirps(allOriginals, social?.state.reposts, social?.state.repostNotes, users)
+      .filter(post => String(post.uid) === String(uid)), postPreferences
+  ), [allOriginals, social?.state.reposts, social?.state.repostNotes, users, uid, postPreferences]);
+  const visiblePosts = activeTab === 'rechirps' ? myRechirps : activeTab === 'media'  ? posts.filter(post => !!post.media || !!post.attachment) :
     activeTab === 'likes' ? applyPostPreferences([...localChirps.filter(post => !post.groupId), ...demoFeed], postPreferences).filter(post => (social?.state.likes[String(post.id)] || []).some(uid => String(uid) === String(profileUser?.uid))) : posts;
   const { captureBeforeRemoval } = useFeedReflow(streamRef, `${uid}:${activeTab}:${visiblePosts.map(post => post.id).join('|')}`);
   const { destroying, animateDelete, animateHide } = usePostDestruction(
-    id => { captureBeforeRemoval(); onDeletePost?.(id); },
+    id => { captureBeforeRemoval(); if (!social?.removeRepost?.(id)) onDeletePost?.(id); },
     id => { captureBeforeRemoval(); onHidePost?.(id); }
   );
   useScrollFragments(streamRef, `${uid}:${activeTab}:${visiblePosts.map(post => `${post.id}:${post.text}`).join("|")}`);
@@ -184,7 +190,7 @@ export default function Account({ currentUser, users, appearancesByUid = {}, onA
     <main className={`account-page account-page--${appearance.theme}`} data-profile-theme={appearance.theme} style={{ '--profile-hue': hexToHue(appearance.color), '--profile-accent': appearance.color }}>
       <AccountAtmosphere />
       <ProfileReveal key={`${location.key}:${uid}`} name={profileUser.username} />
-      <header className="account-topbar"><div className="account-topbar__inner"><Link to="/feed" className="feed-wordmark"><span className="feed-wordmark__icon" aria-hidden="true" /> chirpr<span>.</span></Link><div className="account-topbar__center"><span className="account-topbar__dot" /> A SPACE OF THEIR OWN</div><nav aria-label="Account navigation"><Link to="/feed">⌂ Feed</Link><Link to="/reels">▣ Reels</Link>{currentUser ? <Link to={`/users/${currentUser.username}`}>◉ My profile</Link> : <Link to="/login">↗ Log in</Link>}</nav></div></header>
+      <header className="account-topbar"><div className="account-topbar__inner"><Link to="/feed" className="feed-wordmark"><span className="feed-wordmark__icon"></span> chirpr<span>.</span></Link><div className="account-topbar__center"><span className="account-topbar__dot" /> A SPACE OF THEIR OWN</div><nav aria-label="Account navigation"><Link to="/feed">⌂ Feed</Link><Link to="/reels">▣ Reels</Link>{currentUser ? <Link to={`/users/${currentUser.username}`}>◉ My profile</Link> : <Link to="/login">↗ Log in</Link>}</nav></div></header>
       <div className="account-layout">
         <aside className="account-sidebar account-sidebar--left"><div className="account-sidebar__sticky"><span className="account-sidebar__eyebrow">EXPLORE CHIRPR</span><Link className="account-sidebar__nav" to="/feed">⌂ <span>For you</span></Link><Link className="account-sidebar__nav" to="/reels">▣ <span>Reels</span></Link><Link className="account-sidebar__nav" to="/groups">✳ <span>Groups</span></Link><Link className="account-sidebar__nav account-sidebar__nav--active" to={`/users/${profileUser.username}`}>◉ <span>This profile</span><i /></Link><div className="account-side-quote"><span>✧</span><p>A little thought.<br /><strong>A bigger connection.</strong></p></div><div className="account-sidebar__foot">CHIRPR / YOUR CORNER<br />© {new Date().getFullYear()}</div></div></aside>
         <div className="account-content">
@@ -204,6 +210,7 @@ export default function Account({ currentUser, users, appearancesByUid = {}, onA
             {[
               { id: 'chirps', label: '✦ Chirps' },
               { id: 'media', label: '◈ Media' },
+              { id: 'rechirps', label: '⇄ Rechirps' },
               { id: 'likes', label: '♡ Likes' }
             ].map(tab => <button key={tab.id} type="button" role="tab" id={`account-tab-${tab.id}`} aria-selected={activeTab === tab.id} aria-controls="account-posts-panel" className={activeTab === tab.id ? 'account-tabs__active' : ''} onClick={() => setActiveTab(tab.id)}>{tab.label}</button>)}
           </div>
@@ -225,13 +232,13 @@ export default function Account({ currentUser, users, appearancesByUid = {}, onA
             </section>
           )}
           <section id="account-posts-panel" role="tabpanel" aria-labelledby={`account-tab-${activeTab}`}>
-            <div className="account-stream-heading"><span><i /> {activeTab === 'chirps' ? 'THE CONVERSATION' : activeTab === 'media' ? 'SHARED MOMENTS' : 'FAVORITE THOUGHTS'}</span><small>SCROLL TO WATCH CHIRPS ASSEMBLE ↓</small></div>
+            <div className="account-stream-heading"><span><i /> {activeTab === 'chirps' ? 'THE CONVERSATION' : activeTab === 'media' ? 'SHARED MOMENTS' : activeTab === 'rechirps' ? 'SHARED AGAIN' : 'FAVORITE THOUGHTS'}</span><small>SCROLL TO WATCH CHIRPS ASSEMBLE ↓</small></div>
             <div className="account-stream" ref={streamRef}>
               {visiblePosts.length ? visiblePosts.map((post, index) => (
                 <div key={post.id || index} id={`chirp-${post.id}`} data-post-id={String(post.id)} data-feed-reflow-item data-new-chirp={post.id} data-chirp-entry-target={String(post.id)} className={`account-stream-post${arrivingId === post.id ? ' account-stream-post--awaiting' : ''}${justPostedId === post.id ? ' account-stream-post--landed' : ''}`}>
                   <FragmentChirp post={post} author={users.find(person => String(person.uid) === String(post.uid))} appearance={appearancesByUid[String(post.uid)]} liked={likedIds.has(post.id)} onLike={toggleLike} saved={postPreferences.saved.includes(String(post.id))} onSave={currentUser ? onSavePost : undefined} onOpenOptions={openOptions} destruction={destroying[String(post.id)]} viewerUid={currentUser?.uid} />
                 </div>
-              )) : <div className="account-empty">{activeTab === 'chirps' ? 'No chirps yet. Every story starts somewhere. ✦' : activeTab === 'media' ? 'No media chirps here yet. ✦' : 'Like a chirp to see it here. ♡'}</div>}
+              )) : <div className="account-empty">{activeTab === 'chirps' ? 'No chirps yet. Every story starts somewhere. ✦' : activeTab === 'media' ? 'No media chirps here yet. ✦' : activeTab === 'rechirps' ? 'No rechirps shared yet. ⇄' : 'Like a chirp to see it here. ♡'}</div>}
             </div>
           </section>
           <div className="account-end"><span>✳</span><h2>That's their story, <em>so far.</em></h2><p>Even the smallest thought can start something big.</p><Link to="/feed">Explore more chirps ↗</Link></div>

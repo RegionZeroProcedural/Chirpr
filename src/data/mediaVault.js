@@ -34,7 +34,7 @@ export async function storeMedia(file, warning = '', altText = '') {
   });
   return { id, kind, name: file.name.slice(0, 120), alt: String(altText).slice(0, 180), mime: file.type, bytes: file.size,
     warning: String(warning).slice(0, 120),
-    moderation: { status: 'pending_review', reasons: ['Awaiting content review'] } };
+    moderation: { status: 'pending_scan', reasons: ['Automatic safety scan pending'] } };
 }
 export async function readMedia(id) {
   const db = await openDb();

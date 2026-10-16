@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { TransitionLink } from '../components/PageTransitions.jsx';
+import useDemoSignIn from '../components/useDemoSignIn.js';
+import AuthDissolveParticles from '../components/AuthDissolveParticles.jsx';
+import GuestSignInButton from '../components/GuestSignInButton.jsx';
 import { USERNAME_PATTERN, isUsernameTaken, useUsernameAvailability } from '../components/useUsernameAvailability.js';
 
 const Cube = ({ name }) => <span className={`register-cube register-cube--${name}`} />;
 
-export default function Register({ users = [], onRegister }) {
+export default function Register({ users = [], onRegister, onGuestSignIn }) {
+    const { dissolving, handleGuestSignIn } = useDemoSignIn(null, onGuestSignIn);
     const [username, setUsername] = useState('');
     const usernameStatus = useUsernameAvailability(username, users);
     const [passwordVisible, setPasswordVisible] = useState(false);
@@ -26,7 +30,8 @@ export default function Register({ users = [], onRegister }) {
     }
 
     return (
-        <main className="login-page register-page" data-transition-page>
+        <main className={`login-page register-page ${dissolving ? 'chirpr-auth-dissolving' : ''}`} data-transition-page>
+            <AuthDissolveParticles active={dissolving} />
             <div className="login-page__atmosphere" aria-hidden="true" />
             <div className="register-page__scene" aria-hidden="true">
                 <span className="register-page__orbit register-page__orbit--one" />
@@ -96,6 +101,11 @@ export default function Register({ users = [], onRegister }) {
                         <button type="submit" className="login-page__submit chirpr-hover-glow">Create my account <span aria-hidden="true">↗</span></button>
                         {feedback && <p className="login-page__feedback" role="status">{feedback}</p>}
                     </form>
+                    <div className="chirpr-guest-entry">
+                        <span className="chirpr-guest-entry__label">WANT TO LOOK AROUND FIRST?</span>
+                        <GuestSignInButton onClick={handleGuestSignIn} disabled={dissolving} />
+                        <small>Preview the site now. Create an account later.</small>
+                    </div>
                     <div className="login-page__divider"><span>ALREADY HERE?</span></div>
                     <TransitionLink className="login-page__create chirpr-hover-glow" to="/login">Sign in instead <span aria-hidden="true">→</span></TransitionLink>
                     <p className="login-page__card-bottom">It all begins with a chirp.</p>

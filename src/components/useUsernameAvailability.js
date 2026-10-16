@@ -6,6 +6,8 @@ export const USERNAME_PATTERN = /^[a-zA-Z0-9_]{3,20}$/;
 
 export function isUsernameTaken(username, users = [], ownUid = null) {
   const wanted = username.trim().toLowerCase();
+  // Reserve the built-in guest identity for temporary preview sessions.
+  if (wanted === 'chirpr_guest' && String(ownUid) !== 'chirpr-guest-preview') return true;
   return users.some(user => String(user.uid) !== String(ownUid) && user.username?.toLowerCase() === wanted);
 }
 

@@ -2,30 +2,34 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 const DISSOLVE_MS = 860;
 
-/** Frontend-only sign-in choreography. Native required fields validate the inputs. */
-export default function useDemoSignIn(onSignIn) {
+/** Shares the login dissolve between password-demo and password-free guest entry. */
+export default function useDemoSignIn(onSignIn, onGuestSignIn = onSignIn) {
     const [dissolving, setDissolving] = useState(false);
     const timerRef = useRef(null);
     const activeRef = useRef(false);
 
     useEffect(() => () => window.clearTimeout(timerRef.current), []);
 
-    const handleSubmit = useCallback((event) => {
-        event.preventDefault();
-        if (activeRef.current) return;
-        const form = event.currentTarget;
-        if (!form.reportValidity()) return;
-
-        // Deliberately accepts any nonempty credentials. No user identity is verified.
+    const beginTransition = useCallback((action) => {
+        if (activeRef.current || typeof action !== 'function') return;
         activeRef.current = true;
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
         if (reduceMotion) {
-            onSignIn();
+            action();
         } else {
             setDissolving(true);
-            timerRef.current = window.setTimeout(onSignIn, DISSOLVE_MS);
+            timerRef.current = window.setTimeout(action, DISSOLVE_MS);
         }
-    }, [onSignIn]);
+    }, []);
 
-    return { dissolving, handleSubmit };
+    const handleSubmit = useCallback((event) => {
+        event.preventDefault();
+        if (!event.currentTarget.reportValidity()) return;
+        beginTransition(onSignIn);
+    }, [beginTransition, onSignIn]);
+
+    // Does not validate or submit surrounding login/registration fields.
+    const handleGuestSignIn = useCallback(() => beginTransition(onGuestSignIn), [beginTransition, onGuestSignIn]);
+
+    return { dissolving, handleSubmit, handleGuestSignIn };
 }

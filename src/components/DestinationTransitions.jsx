@@ -46,21 +46,22 @@ export default function DestinationTransitions() {
       setScene(null);
       return undefined;
     }
+    const mobile = window.matchMedia?.('(max-width: 700px), (pointer: coarse)').matches;
     const type = destinationForPath(location.pathname);
     // The dedicated full-screen Reels portal owns this destination.
     if (type === 'reels') { setScene(null); return undefined; }
-    setScene({ type, key: location.key });
-    timer.current = window.setTimeout(() => setScene(null), 720);
+    setScene({ type, key: location.key, mobile });
+    timer.current = window.setTimeout(() => setScene(null), mobile ? 310 : 720);
     return () => window.clearTimeout(timer.current);
   }, [location.key, location.pathname]);
   if (!scene) return null;
   const [label, symbol] = details[scene.type];
   return createPortal(
-    <div key={scene.key} className={`chirpr-destination chirpr-destination--${scene.type}`} aria-hidden="true">
+    <div key={scene.key} className={`chirpr-destination chirpr-destination--${scene.type}${scene.mobile ? ' chirpr-destination--lite' : ''}`} aria-hidden="true">
       <div className="chirpr-destination__glimmer" />
-      <div className="chirpr-destination__shapes">
+      {!scene.mobile && <div className="chirpr-destination__shapes">
         {Array.from({ length: 5 }, (_, i) => <i key={i} style={{ '--i': i, '--size': `${26 + 9 * i}px`, '--ring': `${85 + i * 62}px`, '--ring-half': `${-(85 + i * 62) / 2}px`, '--path-x': `${(i - 2) * 36}vw`, '--path-exit': `${(2 - i) * 14}vw`, '--origin-y': `${(i % 2 ? 1 : -1) * 22}vh` }} />)}
-      </div>
+      </div>}
       <div className="chirpr-destination__identity"><b>{symbol}</b><small>{label}</small></div>
     </div>, document.body
   );

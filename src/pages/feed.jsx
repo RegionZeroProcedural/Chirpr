@@ -7,6 +7,7 @@ import { useTextChirpFlight } from '../components/useTextChirpFlight.js';
 import { SHARDS, useScrollFragments } from '../components/useScrollFragments.js';
 import { Link } from 'react-router-dom';
 import { demoFeed } from '../data/demoFeed.js';
+import { getRechirps } from '../data/rechirps.js';
 import PostOptionsModal from '../components/PostOptionsModal.jsx';
 import { DEFAULT_APPEARANCE, normalizeAppearance, hexToHue, THEME_PRESETS } from '../data/accountAppearance.js';
 import { applyPostPreferences } from '../data/postPreferences.js';
@@ -46,9 +47,9 @@ function ChirpSurface({ post, author, liked, onLike, onOpenOptions, onSave, save
         <p><LinkedPostText text={post.text} visual={visual} /></p>
         {post.attachment && (visual ? (
           <div className="chirpr-attachment chirpr-attachment--shard-placeholder" aria-hidden="true">
-            <span>{post.attachment.kind === 'video' ? '▣ VIDEO' : '▧ IMAGE'} · {post.attachment.moderation?.status === 'approved' ? 'MEDIA' : 'AWAITING REVIEW'}</span>
+            <span>{post.attachment.kind === 'video' ? '▣ VIDEO' : '▧ IMAGE'} · {post.attachment.moderation?.status === 'approved' ? 'MEDIA' : post.attachment.moderation?.status === 'sensitive' ? 'SENSITIVE CONTENT' : 'SAFETY SCAN' }</span>
           </div>
-        ) : <ChirpAttachment attachment={post.attachment} allowedPreview={canPreviewMedia} />)}
+        ) : <ChirpAttachment attachment={post.attachment} owner={canPreviewMedia} allowedPreview={canPreviewMedia} />)}
         {post.media && (
           <div className={`feed-chirp__media feed-chirp__media--${post.accent || 'blue'}`}>
             <span className="feed-chirp__media-ring" aria-hidden="true" />
@@ -202,13 +203,9 @@ export default function Feed({ currentUser, users, onSignOut, localChirps = [], 
   const posts = useMemo(() => {
     const originals = [...localChirps.filter(post => !post.groupId), ...demoFeed];
     // Rechirps are distinct feed cards attributed to the account that shared them.
-    const broadcasts = Object.entries(social?.state.reposts || {}).flatMap(([id, uids]) => {
-      const original = originals.find(post => String(post.id) === id);
-      if (!original) return [];
-      return uids.map(uid => ({ ...original, id: `rechirp-${uid}-${id}`, uid, text: `⇄ Rechirped: @${users.find(user => String(user.uid) === String(original.uid))?.username || 'community'}\n${original.text}`, topic: 'RECHIRPED', age: 'now', attachment: original.attachment, likes: 0, replies: 0, shares: 0 }));
-    });
+    const broadcasts = getRechirps(originals, social?.state.reposts, social?.state.repostNotes, users);
     return applyPostPreferences([...broadcasts, ...originals], postPreferences).filter(post => !social?.isBlocked(post.uid) && !social?.isMuted(post.uid));
-  }, [localChirps, postPreferences, social?.state.reposts, social?.state.blocked, social?.state.muted, currentUser?.uid, users]);
+  }, [localChirps, postPreferences, social?.state.reposts, social?.state.repostNotes, social?.state.blocked, social?.state.muted, currentUser?.uid, users]);
   const listRef = useRef(null);
   const composerRef = useRef(null);
   const { begin: beginTextFlight, pendingFlight, flight, arrivingId, justPostedId } = useTextChirpFlight(listRef, posts.map(post => post.id).join('|'));
@@ -216,7 +213,7 @@ export default function Feed({ currentUser, users, onSignOut, localChirps = [], 
   // The fragment explosion plays first. Immediately before its delayed
   // deletion is committed, record the survivors' starting positions.
   const { destroying, animateDelete, animateHide } = usePostDestruction(
-    id => { captureBeforeRemoval(); onDeletePost?.(id); },
+    id => { captureBeforeRemoval(); if (!social?.removeRepost?.(id)) onDeletePost?.(id); },
     id => { captureBeforeRemoval(); onHidePost?.(id); }
   );
   const [optionPost, setOptionPost] = useState(null);
@@ -270,7 +267,7 @@ export default function Feed({ currentUser, users, onSignOut, localChirps = [], 
       </div>
       <header className="feed-topbar">
         <div className="feed-topbar__inner">
-          <Link to="/feed" className="feed-wordmark" aria-label="Chirpr feed"><span className="feed-wordmark__icon" aria-hidden="true" /> chirpr<span>.</span></Link>
+          <Link to="/feed" className="feed-wordmark" aria-label="Chirpr feed"><span className="feed-wordmark__icon">✳</span> chirpr<span>.</span></Link>
           <div className="feed-topbar__section"><span className="feed-topbar__live" /> YOUR SPACE, UNFOLDING</div>
           <div className="feed-topbar__end"><Link to="/reels" className="feed-topbar__reels-link">▣ Reels</Link><span className="feed-topbar__welcome">Hi, {currentUser.displayName}</span><button type="button" onClick={onSignOut}>Sign out <span aria-hidden="true">↗</span></button></div>
         </div>
@@ -314,7 +311,7 @@ export default function Feed({ currentUser, users, onSignOut, localChirps = [], 
           <div className="feed-rail__sticky">
             <div className="feed-info-card"><span className="feed-info-card__tag">✧ LIVE DEMO</span><h2>A feed that<br /><em>comes alive.</em></h2><p>Watch each chirp materialize out of eight fragments as you scroll down.</p><div className="feed-info-card__divider" /><p>Scroll back up and the fragments reverse — at both ends of the screen.</p><div className="feed-info-card__orbit" aria-hidden="true" /></div>
             <div className="feed-people"><h3>YOUR PEOPLE <span>✧</span></h3>{users.filter(user => user.uid !== currentUser.uid).map((user, i) => <Link to={`/users/${user.username}`} key={user.uid}><span className={`feed-avatar feed-avatar--${i ? 'cyan' : 'violet'}`}>{user.displayName.slice(0, 1)}</span><span><strong>{user.displayName}</strong><small>@{user.username}</small></span><b aria-hidden="true">↗</b></Link>)}</div>
-            <p className="feed-info-disclaimer">Demo mode: any credentials sign in. New chirps are saved locally in this browser.</p>
+            <p className="feed-info-disclaimer">{currentUser.isGuest ? "Guest preview: explore and try Chirpr without an account. Your guest activity is temporary and is cleared when you sign out." : "Demo mode: any credentials sign in. New chirps are saved locally in this browser."}</p>
           </div>
         </aside>
       </div>

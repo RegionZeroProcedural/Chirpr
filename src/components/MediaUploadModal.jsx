@@ -99,7 +99,7 @@ export default function MediaUploadModal({ origin, draft = '', groupId = null, i
       <div className="chirpr-upload-modal__top"><span>✳ MEDIA STUDIO / 01</span><button aria-label="Close upload" type="button" disabled={stage !== 'open'} onClick={dismiss}>✕</button></div>
       <div className="chirpr-upload-modal__intro">
         <h2 id={`${id}-title`}>Give your thought <em>dimension.</em></h2>
-        <p>Upload an image or video. New media is private and awaiting moderation; it is not published to other devices.</p>
+        <p>Upload an image or video. Media is checked automatically for sensitive or graphic content. Incomplete scans remain private.</p>
       </div>
       <form onSubmit={submit} className="chirpr-upload-modal__form">
         <div className="chirpr-upload-modal__content">
@@ -109,8 +109,8 @@ export default function MediaUploadModal({ origin, draft = '', groupId = null, i
         <label className="chirpr-upload-modal__field">CAPTION <textarea rows={2} maxLength={500} value={caption} onChange={e => setCaption(e.target.value)} placeholder="Your thoughts… #stories @friends" /></label>
         {kind === 'image' && file && <label className="chirpr-upload-modal__field">IMAGE DESCRIPTION (ACCESSIBILITY) <input type="text" maxLength={180} value={alt} onChange={e => setAlt(e.target.value)} placeholder="Describe what appears in the image" /></label>}
         <label className="chirpr-upload-modal__field">CONTENT NOTICE <select value={warning} onChange={e => setWarning(e.target.value)}>{CONTENT_NOTICES.map(item => <option key={item.value} value={item.value}>{item.text}</option>)}</select></label>
-        {kind === 'video' && file && <label className="chirpr-upload-reels"><div><strong>Also submit to Chirpr Reels</strong><small>Off by default. Opt-in does not bypass moderation. Reels stay pending until approved.</small></div><input type="checkbox" role="switch" checked={shareToReels} onChange={e => setShareToReels(e.target.checked)} /><span aria-hidden="true" /></label>}
-        <div className="chirpr-upload-modal__review">◈ Stored privately in this browser. If configured, the optional scanning service receives captions and images. Videos require separate review. Nothing is approved for public distribution yet.</div>
+        {kind === 'video' && file && <label className="chirpr-upload-reels"><div><strong>Also submit to Chirpr Reels</strong><small>Off by default. Videos cannot enter public Reels until full video and audio safety analysis is available.</small></div><input type="checkbox" role="switch" checked={shareToReels} onChange={e => setShareToReels(e.target.checked)} /><span aria-hidden="true" /></label>}
+        <div className="chirpr-upload-modal__review">◈ Local demo: Images are scanned automatically for sexual or violent imagery. Videos receive a partial frame scan and remain unavailable publicly until comprehensive automated video/audio analysis is implemented. Reports and appeals are the only planned human review routes.</div>
         {error && <div className="chirpr-upload-modal__error" role="alert">{error}</div>}
         </div>
         <div className="chirpr-upload-modal__footer"><button type="button" onClick={dismiss} disabled={stage !== 'open'}>Cancel</button><button type="submit" className="chirpr-hover-glow" disabled={!file || stage !== 'open'}>Post with media <span>➤</span></button></div>
